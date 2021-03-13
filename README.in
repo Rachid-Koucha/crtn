@@ -1,0 +1,279 @@
+
+           ============================================
+                        CoRouTiNe service
+                              (CRTN)
+           ============================================
+
+
+
+CONTENTS OF THIS FILE
+=====================
+   
+ * Introduction
+ * Maintainers
+ * Build suites
+ * Download
+ * cmake
+   * crtn_install.sh script
+   * Build, installation, cleanup
+   * Tests
+   * Tests coverage measurement
+   * Packaging
+   * Notes about RPM package
+   * Notes about DEB package
+   * Cross-compilation
+ * Documentation
+   * On line manuals
+   * Articles
+ * References
+
+
+Introduction
+============
+
+CoRouTiNe (CRTN) is an API which proposes coroutines in C language programs.
+
+CRTN is distributed under the GNU LGPL license.
+
+The current document concerns the @VERSION@ version of the CRTN package.
+
+
+Maintainers
+===========
+
+To report a bug or design enhancement, please contact:
+
+  Rachid Koucha <rachid dot koucha at gmail dot com>
+
+
+Build suite
+===========
+
+CRTN is built with CMAKE.
+
+
+Download
+========
+
+... To be completed ...
+
+
+===============================================================================
+                                      CMAKE
+===============================================================================
+
+crtn_install.sh script
+======================
+
+This script is a swiss army knife to make several things:
+
+$ ./crtn_install.sh -h
+
+Usage:
+
+  crtn_install.sh [-b browser] [-c] [-T|-C] [-d install_dir] [-o MBX|SEM]
+                  [-B] [-I] [-U] [-A] [-P RPM|DEB|TGZ|STGZ] [-h]
+
+    -b    : Browser's pathname to display the test coverage HTML results
+    -c    : Cleanup built objects
+    -C    : Launch the test coverage measurement
+    -T    : Launch the regression tests
+    -d    : Installation directory (default: @CMAKE_INSTALL_PREFIX@)
+    -P (*): Generate DEB/RPM/TGZ/STGZ packages
+    -B    : Build the software
+    -I (*): Install the software
+    -U (*): Uninstall the software
+    -A    : Generate an archive of the software (sources)
+    -o    : Add MBX|SEM service
+    -h    : this help
+
+   (*) Super user rights required
+
+
+Note that some options require super user priviledges to run. Use "sudo" for example.
+
+
+Build, installation, cleanup
+============================
+
+* To build the library:
+
+$ ./crtn_install.sh -B
+
+* If mailbox and/or semaphores are required, add the corresponding option on the command line:
+
+$ ./crtn_install.sh -B -o mbx -o sem
+
+* For a complete installation in the default @CMAKE_INSTALL_PREFIX@ subtree (super user rights required):
+
+$ sudo ./crtn_install.sh -I
+
+* To uninstall the software:
+
+$ sudo ./crtn_install.sh -U (super user rights required):
+
+* To cleanup every generated files to go back to original source tree:
+
+$ ./crtn_install.sh -c
+
+
+Tests
+=====
+
+The regression tests are based on CHECK library. The latter must be installed
+prior to launch the tests.
+
+
+. To trigger the regression tests for the whole software:
+
+$ ./crtn_install.sh -T
+[...]
+100%: Checks: 31, Failures: 0, Errors: 0
+
+
+Tests coverage measurement
+==========================
+
+. To trigger test coverage measurement for CRTN (with a display of the result in firefox):
+
+$ ./crtn_install.sh -C -b firefox
+
+
+Packaging
+=========
+
+. To make a source package, use the -A option of crtn_install.sh:
+
+$ ./crtn_install.sh -A
+
+This makes a TGZ file of the complete source tree: crtn_src-@VERSION@.tgz
+
+
+. In cmake mode, we provide the ability to generate Debian (DEB), Red-Hat
+  Package Manager (RPM), Tar GZipped (TGZ) and Self Extracting Tar GZipped
+  (STGZ) binary packages.
+
+. To build the packages (TGZ, DEB, RPM...):
+
+$ sudo ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz
+
+This makes the following binary packages:
+
+        . @CMAKE_PROJECT_NAME@_@VERSION@_amd64.deb (DEB)
+        . @CMAKE_PROJECT_NAME@-@VERSION@-1.x86_64.rpm (RPM)
+        . @CMAKE_PROJECT_NAME@-@VERSION@-Linux-crtn.tar.gz (TGZ)
+        . @CMAKE_PROJECT_NAME@-@VERSION@-Linux-crtn.sh (STGZ)
+        
+
+Notes about RPM package
+=======================
+
+. Use the following to get information on a package file:
+
+$ rpm -qp --info crtn-@VERSION@-1.x86_64.rpm
+Name        : crtn
+Version     : @VERSION@
+Release     : 1
+Architecture: x86_64
+[...]
+License     : GPL/LGPL
+Signature   : (none)
+Source RPM  : crtn-@VERSION@-1.src.rpm
+[...]
+Relocations : @CMAKE_INSTALL_PREFIX@ 
+Vendor      : Rachid Koucha
+URL         : http://crtn.sourceforge.net
+Summary     : CRTN (System stress)
+Description :
+System loading and latency evaluation
+
+
+. Use the following to get the pre/post-installation scripts in a package file:
+
+$ rpm -qp --scripts rsys-@VERSION@-1.x86_64.rpm
+preinstall program: /bin/sh
+postinstall scriptlet (using /bin/sh):
+
+#!/bin/sh
+
+INSTALL_PREFIX=@CMAKE_INSTALL_PREFIX@
+
+FILE=${INSTALL_PREFIX}/lib/cmake/FindRsys.cmake
+chmod 644  ${FILE}
+[...]
+
+. Use following to list the files for an INSTALLED package:
+
+$ rpm -ql crtn
+
+. Use following to list the files in a package file:
+
+$ rpm -ql crtn-@VERSION@-1.x86_64.rpm
+
+. The required package list of an RPM file could be printed with:
+
+$ rpm -qp --requires crtn-@VERSION@-1.x86_64.rpm
+
+
+
+
+Notes about DEB package
+=======================
+
+. Use the following to get information on a package file:
+
+$ dpkg --info crtn_@VERSION@_amd64.deb
+[...]
+ Package: crtn
+ Version: @VERSION@
+ Section: devel
+ Priority: optional
+ Architecture: amd64
+ Homepage: https://sourceforge.net/projects/crtn/
+[...]
+ Maintainer: Rachid Koucha <rachid dot koucha at gmail dot com>
+ Description: System loading and latency evaluation
+
+
+. Use following to list the files in a package file:
+
+$ dpkg -c crtn_@VERSION@_amd64.deb
+
+. Use following to install the content of a package file:
+
+$ sudo dpkg -i crtn_@VERSION@_amd64.deb
+drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/
+drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/
+drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/include/
+-r--r--r-- root/root      4291 2021-03-12 20:05 ./usr/local/include/crtn.h
+drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/lib/
+lrwxrwxrwx root/root         0 2021-03-12 20:06 ./usr/local/lib/libcrtn.so -> libcrtn.so.0
+[...]
+
+. Use the following to list the installed packages:
+
+$ dpkg -l | grep crtn
+ii  crtn  @VERSION@    amd64   Custom SYStem services
+
+. Use following to uninstall (remove) a package:
+
+$ sudo dpkg -r crtn
+
+
+===============================================================================
+
+                                    DOCUMENTATION
+                                    =============
+
+On line manuals
+===============
+
+. Once CRTN is installed, it is possible to access the corresponding
+  on line manuals with:
+
+
+$ man 3 crtn       # Manual of crtn API
+
+
+
+

@@ -1,0 +1,77 @@
+.TH CRTN 7  "FEBRUARY 2021" "API v@CRTN_VERSION@" "API v@CRTN_VERSION@"
+.SH NAME
+crtn \- API of CoRouTiNe service
+
+.SH DESCRIPTION
+
+The
+.B CRTN
+API is a set of services to manage concurrent execution flows in a program. They are named coroutines.
+A coroutine can be suspended or resumed under the control of the user. The underlying operating system
+have no idea of their existence. More precisely, they divide the execution flow of the main thread
+of a process into several ones.
+
+.PP
+The service is based on GLIBC's services to save/restore the execution contexts of the coroutines.
+
+.PP
+The interface file of the API is <crtn.h>.
+
+.PP
+A coroutine is created with
+.BR crtn_spawn (3).
+The latter returns a unique coroutine identifier (cid).
+
+.PP
+Two types of coroutines are provided: stackless and stackful.
+
+.PP
+The stackless coroutines are typically used in environment where memory space is a constraint. But they suffer some limitations: the local variables content are no longer valid when there are resumed. The local variables must be reinitialized each time a coroutine is resumed. Moreover, it is not advised to suspend the execution of a stackless coroutine from a sub-function has the stack frames may be clobbered when the coroutine is resumed.
+
+.PP
+The stackful coroutines have their own stack. So, there are no restrictions concerning the data stored in the stack. They are private to the coroutine.
+It is also possible to set the stack size to a value different than the default one.
+
+.PP
+Two scheduling types are provided: stepper and standalone.
+
+.PP
+A stepper coroutine is by default suspended. Another coroutine must call
+.BR crtn_wait (3)
+to resume it. The coroutine suspends itself upon a call to
+.BR crtn_yield (3).
+
+.PP
+A standalone coroutine is by default always runnable. It suspends its execution upon a call to
+.BR crtn_yield (3).
+But it stays runnable and may be resumed at any moment when a call
+to
+.BR crtn_yield (3)
+is done by any other coroutine. 
+
+.PP
+A coroutine terminates when it reaches the end of its entry point, when it calls
+.BR crtn_exit (3)
+or when another coroutine calls
+.BR crtn_cancel (3)
+to finish it.
+
+.PP
+A terminated coroutine stays in a zombie state until another coroutine calls
+.BR crtn_join (3)
+to get its termination status and to implicitly free the corresponding internal data structures.
+The latter is an integer with a user defined signification.
+
+.PP
+Inter-coroutine communication/synchronization are provided with the mailboxes (cf.
+.BR crtn_mbx (3))
+and semaphores (cf.
+.BR crtn_sem (3)).
+
+.SH AUTHOR
+Rachid Koucha
+
+.SH "SEE ALSO"
+.BR crtn (3),
+.BR crtn_mbx (3),
+.BR crtn_sem (3).

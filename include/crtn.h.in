@@ -1,0 +1,186 @@
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// File        : crtn.h
+// Description : API of Coroutines (version @CRTN_VERSION@)
+// License     :
+//
+//  Copyright (C) 2021 Rachid Koucha <rachid dot koucha at gmail dot com>
+//
+//  This library is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU Lesser General Public
+//  License as published by the Free Software Foundation; either
+//  version 2.1 of the License, or (at your option) any later version.
+//
+//  This library is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//  Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with this library; if not, write to:
+//  the Free Software Foundation, Inc.,
+//  51 Franklin Street, Fifth Floor,
+//  Boston, MA  02110-1301  USA
+//
+//
+// Evolutions  :
+//
+//     08-Feb-2021 R. Koucha      - Creation
+//
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+#ifndef CRTN_H
+#define CRTN_H
+
+#include <sys/types.h>
+
+/*
+  Coroutine identifier
+*/
+typedef int crtn_t;
+
+/*
+  Identifier of the main coroutine
+*/
+#define CRTN_CID_MAIN   0
+
+/*
+  Default size of the stacks
+*/
+#define CRTN_DEFAULT_STACK_SIZE @CFG_CRTN_STACK_SIZE@
+
+/*
+  Status of a cancelled coroutine
+ */
+#define CRTN_STATUS_CANCELLED 255
+
+/*
+  Return code when a coroutine is dead
+*/
+#define CRTN_DEAD 1
+
+/*
+  Attributes of a coroutine
+ */
+typedef void *crtn_attr_t;
+
+extern crtn_attr_t crtn_attr_new(void);
+
+extern int crtn_attr_delete(crtn_attr_t attr);
+
+#define CRTN_TYPE_STANDALONE  0   // Default
+#define CRTN_TYPE_STEPPER     1
+
+
+#define CRTN_TYPE_STACKFUL    0  // Default
+#define CRTN_TYPE_STACKLESS   2
+
+extern int crtn_set_attr_type(
+                              crtn_attr_t attr,
+                              unsigned int type
+                             );
+
+extern int crtn_set_attr_stack_size(
+                                    crtn_attr_t attr,
+                                    size_t stack_size
+                                   );
+
+
+/*
+  Coroutine's maximum name length
+*/
+#define CRTN_NAME_SZ  @CFG_CRTN_NAME_SZ@
+
+/*
+  Coroutine's entry point
+*/
+typedef int (* crtn_entry_t)(void *param);
+
+
+/*
+  Creation of a coroutine
+ */
+extern int crtn_spawn(
+                      crtn_t       *cid,
+                      const char   *name,
+                      crtn_entry_t  entry,
+                      void         *param,
+                      crtn_attr_t   attr
+                     );
+
+extern void crtn_yield(void *data);
+
+extern crtn_t crtn_self(void);
+
+extern int crtn_join(crtn_t cid, int *status);
+
+extern int crtn_wait(crtn_t cid, void **ret);
+
+extern void crtn_exit(int status);
+
+extern int crtn_cancel(crtn_t cid);
+
+extern int crtn_errno(void);
+
+
+//
+// ========================= MAILBOXES =========================
+//
+
+typedef int crtn_mbx_t;
+
+extern int crtn_mbx_new(crtn_mbx_t *mbx);
+
+extern int crtn_mbx_delete(crtn_mbx_t mbx);
+
+extern int crtn_mbx_get(
+                         crtn_mbx_t   mbx,
+                         void       **msg
+                        );
+
+extern int crtn_mbx_tryget(
+                         crtn_mbx_t   mbx,
+                         void       **msg
+                        );
+
+extern int crtn_mbx_post(
+                         crtn_mbx_t  mbx,
+                         void       *msg
+                        );
+
+extern void *crtn_mbx_alloc(
+                            size_t size
+                           );
+
+extern int crtn_mbx_free(
+                          void *msg
+                         );
+
+extern void *crtn_mbx_format(
+                             char   *buffer,
+                             size_t  buffer_size,
+                             size_t *data_size
+                            );
+
+
+
+//
+// ========================= SEMAPHORES =========================
+//
+
+
+typedef int crtn_sem_t;
+
+extern int crtn_sem_new(
+                        crtn_sem_t *sem,
+                        unsigned int initval
+                       );
+
+extern int crtn_sem_delete(crtn_sem_t sem);
+
+extern int crtn_sem_v(crtn_sem_t sem);
+
+extern int crtn_sem_p(crtn_sem_t sem);
+
+
+#endif // CRTN_H

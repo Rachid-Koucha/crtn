@@ -1,0 +1,148 @@
+.TH CRTN 3  "FEBRUARY 2021" "API v0.1.0" "API v0.1.0"
+.SH NAME
+crtn_mbx \- Mailbox API of the CoRouTiNe service
+.SH SYNOPSIS
+.nf
+\fB#include "crtn.h"\fP
+.sp
+
+.PP
+.BI "int crtn_mbx_new(crtn_mbx_t *" mbx ");"
+.BI "int crtn_mbx_delete(crtn_mbx_t " mbx ");"
+
+.PP
+.BI "int crtn_mbx_get(crtn_mbx_t " mbx ", void **" msg ");"
+.BI "int crtn_mbx_tryget(crtn_mbx_t " mbx ", void **" msg ");"
+.BI "int crtn_mbx_post(crtn_mbx_t " mbx ", void *" msg ");"
+
+.PP
+.BI "void *crtn_mbx_alloc(size_t " size ");"
+.BI "void crtn_mbx_free(void *" msg ");"
+.BI "void *crtn_mbx_format(char *" buffer ", size_t " buffer_size ", size_t *" data_size ");"
+
+.fi
+.SH DESCRIPTION
+
+The
+.B CRTN_MBX
+API is a set of services to manage the mailbox for the message passing between the coroutines.
+
+.PP
+The
+.BR crtn_mbx_new ()
+function creates a mailbox. The identifier is returned in
+.I mbx
+parameter.
+
+.PP
+The
+.BR crtn_mbx_delete ()
+function deletes a mailbox with the
+.I mbx
+identifier.
+
+.PP
+The
+.BR crtn_mbx_get ()
+function peeks a message from the mailbox identified by
+.IR mbx .
+The message is returned in
+.I msg
+parameter. If the mailbox is empty, the calling coroutine is suspended until a message arrives.
+An implicit yield operation is done to let any runnable standalone coroutine get the processor.
+
+.PP
+The
+.BR crtn_mbx_tryget ()
+function behaves the same as
+.B crtn_mbx_get()
+except that it returns even if the mailbox is empty.
+
+.PP
+The
+.BR crtn_mbx_post ()
+function posts the message pointed by
+.I msg
+into the mailbox identified by
+.BR mbx .
+
+.PP
+The
+.BR crtn_mbx_alloc ()
+function allocates a message suitable to be posted into a mailbox. The
+.I size
+parameter is the size of the data part of the message.
+
+.PP
+The
+.BR crtn_mbx_free ()
+function frees a message previously allocated by
+.BR crtn_mbx_alloc ().
+
+.PP
+The
+.BR crtn_mbx_format ()
+function formats a user buffer of
+.I buffer_size
+bytes pointed by
+.I buffer
+into a message suitable to be posted into a mailbox. The  returned
+.I data_size
+is the size of the available data part which address is returned by the function. The address
+is right after the internal header allocated in the input buffer.
+
+
+.SH RETURN VALUE
+
+.BR crtn_mbx_new (),
+.BR crtn_mbx_delete (),
+.BR crtn_mbx_get (),
+.BR crtn_mbx_tryget ()
+and
+.BR crtn_mbx_post (),
+return 0 on success; on error, \-1 is returned, and
+.I errno
+is set to indicate the error.
+
+.BR crtn_mbx_alloc ()
+returns the address of the allocated message on success; on error, 
+.B NULL
+is returned, and
+.I errno
+is set to indicate the error.
+
+.BR crtn_mbx_format ()
+returns the address of the data part of the formatted message on success; on error, 
+.B NULL
+is returned, and
+.I errno
+is set to indicate the error.
+
+.SH ERRORS
+The functions may set
+.B errno
+with the following values:
+.TP
+.B EINVAL
+Invalid parameter
+
+.TP
+.B EAGAIN
+returned by
+.BR crtn_mbx_tryget ()
+when the mailbox is empty
+
+.TP
+.B EAGAIN
+returned by
+.BR crtn_mbx_new ()
+when there are no more contexts to create a mailbox
+
+
+.SH EXAMPLES
+
+.SH AUTHOR
+Rachid Koucha
+
+.SH "SEE ALSO"
+.BR crtn (3)

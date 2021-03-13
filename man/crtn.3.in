@@ -1,0 +1,239 @@
+.TH CRTN 3  "FEBRUARY 2021" "API v@CRTN_VERSION@" "API v@CRTN_VERSION@"
+.SH NAME
+crtn \- API of CoRouTiNe service
+.SH SYNOPSIS
+.nf
+\fB#include "crtn.h"\fP
+.sp
+
+.PP
+.BI "typedef int (* " crtn_entry_t ")(void *param);"
+.PP
+.BI "int crtn_spawn(crtn_t *" cid ", const char *" name ", crtn_entry_t " entry ", void *" param ", crtn_attr_t " attr ");"
+.PP
+.BI "crtn_t crtn_self(" void ");"
+.PP
+.BI "crtn_attr_t crtn_attr_new(" void ");"
+.BI "int crtn_attr_delete(crtn_attr_t " attr ");"
+.BI "int crtn_set_attr_type(crtn_attr_t " attr ", unsigned int " type ");"
+.BI "int crtn_set_attr_stack_size(crtn_attr_t " attr ", size_t " stack_size ");"
+.PP
+.BI "void crtn_yield(void *" data ");"
+.BI "int crtn_join(crtn_t " cid ", int *" status ");"
+.BI "int crtn_wait(crtn_t " cid ", void **" ret ");"
+.BI "void crtn_exit(int " status ");"
+.BI "int crtn_cancel(crtn_t " cid ");"
+.PP
+.BI "int crtn_errno(" void ");"
+
+.fi
+.SH DESCRIPTION
+
+The
+.B CRTN
+API is a set of services to manage coroutines.
+
+.PP
+The
+.BR crtn_spawn ()
+function spawns a new coroutine. It is passed a string of at most
+.B CRTN_NAME_SZ
+(@CFG_CRTN_NAME_SZ@)
+characters including the terminating NULL
+in
+.IR "name",
+the
+.I entry
+point function along with its parameter pointed by
+.I param
+and the attributes pointed by
+.IR "attr".
+If the latter is NULL, the default values apply
+(cf.
+.B ctrn_attr_new()
+below).
+The service returns the coroutine identifier at
+the address referenced by
+.IR "cid".
+If the attributes specify a standalone
+coroutine, the resulting coroutine is suspended in the runnable state. Any subsequent call to
+.BR crtn_yield ()
+may resume it.
+If the attributes specify a coroutine of type stepper, it is suspended in the ready state. A call to
+.BR crtn_wait ()
+will start it.
+
+.PP
+The
+.BR crtn_self ()
+function returns the identifier (cid) of the calling coroutine.
+
+.PP
+The
+.BR crtn_attr_new ()
+function allocates a space to define attributes.
+It returns an object of type
+.BR "crtn_attr_t".
+The resulting object is passed as
+last parameter to
+.BR "crtn_spawn()".
+
+.PP
+The 
+.BR crtn_attr_delete ()
+function deletes the space allocated by
+.BR "crtn_attr_new()".
+It is passed the object returned by the latter.
+
+.PP
+The
+.BR crtn_set_attr_type ()
+is passed a
+.I type
+which is an unsigned integer formed by the bitwise OR of zero or more of the following:
+.RS 4
+.TP
+.B CRTN_TYPE_STANDALONE
+The coroutine stays in runnable state even after calling
+.BR "crtn_yield()".
+This is the default value.
+.TP
+.B CRTN_TYPE_STEPPER
+The coroutine is resumed when another coroutine calls
+.BR "crtn_wait()".
+And it is is suspended after a call to
+.BR "crtn_yield()".
+.TP
+.B CRTN_TYPE_STACKFUL
+The coroutine runs with its own stack. This is the default value.
+.TP
+.B CRTN_TYPE_STACKLESS
+The coroutine shares its stack with the other stackless coroutines. Hence, the local variables and stack frames of sub-functions
+may be clobbered when it comes back from a suspended state.
+.RE
+
+.PP
+The
+.BR crtn_set_attr_stack_size ()
+function sets the size of the stack for the coroutine when it is stackful. The default size is CRTN_DEFAULT_STACK_SIZE (@CFG_CRTN_STACK_SIZE@ bytes). 
+
+.PP
+The
+.BR crtn_yield ()
+function suspends the calling coroutine. It may eventually pass the address of some
+.I data
+to some another coroutine waiting on it with
+.BR "crtn_wait()".
+
+.PP
+The
+.BR crtn_join ()
+function waits for the end of a coroutine identified by
+.IR "cid".
+If not NULL, the integer at the address specified by
+.I status
+is filled with the returned status of the coroutine. This calls
+frees the underlying data structures of the terminated
+coroutine.
+
+.PP
+The
+.BR crtn_wait ()
+function resumes the target stepper coroutine identified by
+.I cid
+and makes the calling coroutine wait for its suspension.
+If not NULL, the
+.B ret
+parameter is filled with the address of some data returned by
+the target coroutine. If the target coroutine is finished (end of
+its entry point or cancelled), the return code is
+.B CRTN_DEAD
+and the returned pointer
+.I ret
+is set to NULL.
+
+.PP
+The
+.BR crtn_exit ()
+function terminates the calling coroutine. The
+.B status
+parameter is the termination status of the coroutine.
+
+.PP
+The
+.BR crtn_cancel ()
+function terminates the coroutine identified by
+.IR "cid".
+
+.PP
+The
+.BR crtn_errno ()
+function returns the error code (value from <errno.h>) of the latest failed service called
+by the calling coroutine.
+
+.SH RETURN VALUE
+
+.BR crtn_spawn (),
+.BR crtn_attr_delete (),
+.BR crtn_set_attr_type (),
+.BR crtn_set_attr_stack_size (),
+.BR crtn_join ()
+and
+.BR crtn_cancel ()
+return 0 on success; on error, \-1 is returned, and
+.I errno
+is set to indicate the error.
+
+.BR crtn_wait ()
+returns 0 on success;
+.B CRTN_DEAD
+if the target coroutine is finished; on error, \-1 is returned, and
+.I errno
+is set to indicate the error.
+
+
+.PP
+.BR crtn_self ()
+returns the coroutine identifier of the caller (cid).
+
+.PP
+.BR crtn_attr_new ()
+returns an opaque pointer on attributes on success; on error, NULL is returned, and
+.I errno
+is set to indicate the error.
+
+.PP
+.BR crtn_errno ()
+returns the error number from <errno.h> of the last failed service called by the current coroutine. 
+
+.SH ERRORS
+
+The functions may set
+.I errno
+with the following values:
+.TP
+.B EINVAL
+Invalid parameter
+.TP
+.B EAGAIN
+No more contexts to create a coroutine
+.TP
+.B ENOMEM
+Not enough memory
+.TP
+.B ENOENT
+Invalid coroutine identifier (cid)
+.TP
+.B EBUSY
+Operation already on track with another coroutine
+.TP
+.B EPERM
+Invalid target coroutine type
+
+.SH EXAMPLES
+
+.SH AUTHOR
+Rachid Koucha
+
+.SH "SEE ALSO"
+
