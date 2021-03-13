@@ -55,7 +55,7 @@ CRTN is built with CMAKE.
 Download
 ========
 
-... To be completed ...
+git clone https://github.com/Rachid-Koucha/crtn.git
 
 
 ===============================================================================
@@ -90,7 +90,7 @@ Usage:
    (*) Super user rights required
 
 
-Note that some options require super user priviledges to run. Use "sudo" for example.
+Note that some options require super user privileges to run. Use "sudo" for example.
 
 
 Build, installation, cleanup
@@ -108,9 +108,9 @@ $ ./crtn_install.sh -B -o mbx -o sem
 
 $ sudo ./crtn_install.sh -I
 
-* To uninstall the software:
+* To uninstall the software (super user rights required):
 
-$ sudo ./crtn_install.sh -U (super user rights required):
+$ sudo ./crtn_install.sh -U
 
 * To cleanup every generated files to go back to original source tree:
 
@@ -153,7 +153,7 @@ This makes a TGZ file of the complete source tree: crtn_src-@VERSION@.tgz
   Package Manager (RPM), Tar GZipped (TGZ) and Self Extracting Tar GZipped
   (STGZ) binary packages.
 
-. To build the packages (TGZ, DEB, RPM...):
+. To build the packages TGZ, DEB, RPM... (super user rights required):
 
 $ sudo ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz
 
@@ -239,7 +239,7 @@ $ dpkg --info crtn_@VERSION@_amd64.deb
 
 $ dpkg -c crtn_@VERSION@_amd64.deb
 
-. Use following to install the content of a package file:
+. Use following to install the content of a package file (super user rights required):
 
 $ sudo dpkg -i crtn_@VERSION@_amd64.deb
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/
@@ -255,7 +255,7 @@ lrwxrwxrwx root/root         0 2021-03-12 20:06 ./usr/local/lib/libcrtn.so -> li
 $ dpkg -l | grep crtn
 ii  crtn  @VERSION@    amd64   Custom SYStem services
 
-. Use following to uninstall (remove) a package:
+. Use following to uninstall (remove) a package (super user rights required):
 
 $ sudo dpkg -r crtn
 
@@ -271,9 +271,12 @@ On line manuals
 . Once CRTN is installed, it is possible to access the corresponding
   on line manuals with:
 
+$ man 7 crtn       # Overview of CRTN
 
 $ man 3 crtn       # Manual of crtn API
 
+$ man 3 crtn_mbx   # Manual of crtn mailbox service
 
+$ man 3 crtn_sem   # Manual of crtn semaphore service
 
 
