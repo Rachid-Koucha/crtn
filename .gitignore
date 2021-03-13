@@ -1,0 +1,50 @@
+CMakeCache.txt
+CMakeFiles/
+CPackConfig.cmake
+CPackSourceConfig.cmake
+Makefile
+README
+_CPack_Packages/
+cmake_uninstall.cmake
+cmake_install.cmake
+config.h
+
+# Packaging
+*.rpm
+*.deb
+*.tgz
+crtn-*-Linux-crtn.sh
+crtn-*-Linux-crtn.tar.gz
+
+
+crtn.postinst
+install_manifest_crtn.txt
+todo.txt
+crtn.h
+
+# Build
+*.o
+*.so
+*.so.*
+
+
+# man
+man/*.3
+man/*.7
+man/*.gz
+
+# tests
+tests/check_all
+tests/fibonacci
+tests/mywc
+tests/mywc1
+tests/mywc2
+tests/mywc3
+tests/mywc4
+tests/sig
+tests/switch_ctx2
+tests/switch_ctx3
+tests/tcrtn
+
+# Test coverage
+all_coverage/
