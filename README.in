@@ -182,8 +182,8 @@ Source RPM  : crtn-@VERSION@-1.src.rpm
 [...]
 Relocations : @CMAKE_INSTALL_PREFIX@ 
 Vendor      : Rachid Koucha
-URL         : http://crtn.sourceforge.net
-Summary     : CRTN (System stress)
+URL         : https://github.com/Rachid-Koucha/crtn
+Summary     : CRTN (CoRouTiNe API for C language)
 Description :
 System loading and latency evaluation
 
@@ -229,7 +229,7 @@ $ dpkg --info crtn_@VERSION@_amd64.deb
  Section: devel
  Priority: optional
  Architecture: amd64
- Homepage: https://sourceforge.net/projects/crtn/
+ Homepage: https://github.com/Rachid-Koucha/crtn
 [...]
  Maintainer: Rachid Koucha <rachid dot koucha at gmail dot com>
  Description: System loading and latency evaluation
@@ -253,7 +253,7 @@ lrwxrwxrwx root/root         0 2021-03-12 20:06 ./usr/local/lib/libcrtn.so -> li
 . Use the following to list the installed packages:
 
 $ dpkg -l | grep crtn
-ii  crtn  @VERSION@    amd64   Custom SYStem services
+ii  crtn  @VERSION@    amd64   CoRouTiNe API for C language
 
 . Use following to uninstall (remove) a package (super user rights required):
 

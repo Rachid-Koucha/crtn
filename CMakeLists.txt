@@ -14,8 +14,8 @@ cmake_policy(SET CMP0048 NEW)
 #           PROJECT_HOMEPAGE_URL, crtn_HOMEPAGE_URL
 PROJECT(crtn
         VERSION 0.1.0
-        DESCRIPTION "Custom SYStem services"
-        HOMEPAGE_URL "http://www.rkoucha.fr"
+        DESCRIPTION "CoRouTiNe API for C language"
+        HOMEPAGE_URL "https://github.com/Rachid-Koucha/crtn"
         LANGUAGES C)
 
 SET(CRTN_VERSION "${crtn_VERSION_MAJOR}.${crtn_VERSION_MINOR}.${crtn_VERSION_PATCH}")
@@ -127,8 +127,8 @@ SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY "OFF")
 
 
 SET(PKG_NAME crtn)
-SET(PKG_SUMMARY "CRTN (Custom SYStem services)")
-SET(CPACK_COMPONENT_CRTN_DESCRIPTION "Custom system services")
+SET(PKG_SUMMARY "CRTN (CoRouTiNe API for C language)")
+SET(CPACK_COMPONENT_CRTN_DESCRIPTION ${crtn_DESCRIPTION})
 
 
 #
