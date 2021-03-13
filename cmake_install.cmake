@@ -1,4 +1,4 @@
-# Install script for directory: /home/rachid/DEVS/CRTN
+# Install script for directory: /home/rachid/DEVS/GIT_BASE/crtn
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,10 +39,10 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/rachid/DEVS/CRTN/include/cmake_install.cmake")
-  include("/home/rachid/DEVS/CRTN/lib/cmake_install.cmake")
-  include("/home/rachid/DEVS/CRTN/man/cmake_install.cmake")
-  include("/home/rachid/DEVS/CRTN/tests/cmake_install.cmake")
+  include("/home/rachid/DEVS/GIT_BASE/crtn/include/cmake_install.cmake")
+  include("/home/rachid/DEVS/GIT_BASE/crtn/lib/cmake_install.cmake")
+  include("/home/rachid/DEVS/GIT_BASE/crtn/man/cmake_install.cmake")
+  include("/home/rachid/DEVS/GIT_BASE/crtn/tests/cmake_install.cmake")
 
 endif()
 
@@ -54,5 +54,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/rachid/DEVS/CRTN/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/rachid/DEVS/GIT_BASE/crtn/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
