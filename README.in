@@ -185,7 +185,7 @@ Vendor      : Rachid Koucha
 URL         : https://github.com/Rachid-Koucha/crtn
 Summary     : CRTN (CoRouTiNe API for C language)
 Description :
-System loading and latency evaluation
+CoRouTiNe API for C language
 
 
 . Use the following to get the pre/post-installation scripts in a package file:
@@ -232,7 +232,7 @@ $ dpkg --info crtn_@VERSION@_amd64.deb
  Homepage: https://github.com/Rachid-Koucha/crtn
 [...]
  Maintainer: Rachid Koucha <rachid dot koucha at gmail dot com>
- Description: System loading and latency evaluation
+ Description: CoRouTiNe API for C language
 
 
 . Use following to list the files in a package file:
