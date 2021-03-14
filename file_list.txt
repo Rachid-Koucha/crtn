@@ -4,7 +4,7 @@
 ./COPYING
 ./INSTALL
 ./NEWS
-./README.in
+./README.md.in
 
 ./CodeCoverage.cmake
 
