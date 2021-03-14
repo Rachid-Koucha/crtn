@@ -9,6 +9,9 @@ cmake_uninstall.cmake
 cmake_install.cmake
 config.h
 
+# emacs
+*~
+
 # Packaging
 *.rpm
 *.deb
