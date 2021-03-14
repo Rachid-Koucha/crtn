@@ -1,22 +1,21 @@
-# CoRouTiNe service(CRTN)
-   
-### 1 Introduction
-### 2 Maintainers
-### 3 Build suite
-### 4 Download
-### 5 cmake
-#### 5.1 crtn_install.sh script
-#### 5.2 Build, installation, cleanup
-#### 5.3 Tests
-#### 5.4 Tests coverage measurement
-#### 5.5 Packaging
-#### 5.6 Notes about RPM package
-#### 5.7 Notes about DEB package
-#### 5.8 Cross-compilation
-### 6 Documentation
-#### 6.1 On line manuals
+# CoRouTiNe API (CRTN)
 
-## 1 Introduction
+[1 Introduction](#Introduction)  
+[2 Maintainers](#Maintainers)  
+[3 Build suite](#Build_suite)  
+[4 Download ](#Download)  
+[5 cmake](#cmake)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.1 crtn_install.sh script](#crtn_install_sh_scritpt)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.2 Build, installation, cleanup](#Build_installation_cleanup)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.3 Tests](#Tests)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.4 Tests coverage measurement](#Tests_coverage_measurement)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.5 Packaging](#Packaging)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.6 Notes about RPM package](#Notes_rpm)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.7 Notes about DEB package](#Notes_deb)  
+[6 Documentation](#Documentation)  
+[6.1 On line manuals](#On_lime_man)
+
+## <a name="Introduction"></a>1 Introduction
 
 CoRouTiNe (CRTN) is an API which proposes coroutines in C language programs.
 
@@ -25,28 +24,28 @@ CRTN is distributed under the GNU LGPL license.
 The current document concerns the @VERSION@ version of the CRTN package.
 
 
-## 2 Maintainers
+## <a name="Maintainers"></a>2 Maintainers
 
 
 To report a bug or design enhancement, please contact [Rachid Koucha](mailto:rachid.koucha@gmail.com)
 
 
-## 3 Build suite
+## <a name="Build_suite"></a>3 Build suite
 
 CRTN is built with CMAKE.
 
 
-## 4 Download
+## <a name="Download"></a>4 Download
 
 The source code is available on github. Use the following command to download it:
 ```
 $ git clone https://github.com/Rachid-Koucha/crtn.git
 ```
 
-## 5 cmake
+## <a name="cmake"></a>5 cmake
 
 
-### 5.1 crtn_install.sh script
+### <a name="crtn_install_sh_scritpt"></a>5.1 crtn_install.sh script
 
 
 This shell script is a swiss army knife to make several things. It implicitly uses `cmake`. Display its help:
@@ -78,7 +77,7 @@ Usage:
 Note that some options require super user privileges to run. Use `sudo` for example.
 
 
-### 5.2 Build, installation, cleanup
+### <a name="Build_installation_cleanup"></a>5.2 Build, installation, cleanup
 
 
 * To build the library:
@@ -102,7 +101,7 @@ Note that some options require super user privileges to run. Use `sudo` for exam
 `$ ./crtn_install.sh -c`
 
 
-### 5.3 Tests
+### <a name="Tests"></a>5.3 Tests
 
 The regression tests are based on CHECK library. The latter must be installed
 prior to launch the tests.
@@ -114,7 +113,7 @@ $ ./crtn_install.sh -T
 100%: Checks: 31, Failures: 0, Errors: 0
 
 
-### 5.4 Tests coverage measurement
+### <a name="Tests_coverage_measurement"></a>5.4 Tests coverage measurement
 
 The test coverage measurement requires the `gcov/lcov` packages.
 
@@ -123,7 +122,7 @@ To trigger test coverage measurement for CRTN (with a display of the result in f
 `$ ./crtn_install.sh -C -b firefox`
 
 
-### 5.5 Packaging
+### <a name="Packaging"></a>5.5 Packaging
 
 To make a tar gzip source package, use the `-A` option of `crtn_install.sh`:
 
@@ -145,7 +144,7 @@ This makes the following binary packages:
 * @CMAKE_PROJECT_NAME@-@VERSION@-Linux-crtn.sh (STGZ)
         
 
-### 5.6 Notes about RPM package
+### <a name="Notes_rpm"></a>5.6 Notes about RPM package
 
 Use the following to get information on a package file:
 ```
@@ -193,7 +192,7 @@ The required package list of an RPM file could be printed with:
 ```
 $ rpm -qp --requires crtn-@VERSION@-1.x86_64.rpm
 ```
-### 5.7 Notes about DEB package
+### <a name="Notes_deb"></a>5.7 Notes about DEB package
 
 Use the following to get information on a package file:
 ```
@@ -234,9 +233,9 @@ Use following to uninstall (remove) a package (super user rights required):
 $ sudo dpkg -r crtn
 ```
 
-## 6 DOCUMENTATION
+## <a name="Documentation"></a>6 DOCUMENTATION
 
-### 6.1 On line manuals
+### <a name="On_lime_man"></a>6.1 On line manuals
 
 Once CRTN is installed, it is possible to access the corresponding on line manuals with:
 ```
