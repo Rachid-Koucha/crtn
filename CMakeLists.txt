@@ -61,7 +61,7 @@ OPTION(HAVE_CRTN_SEM "Semaphore service" OFF)
 CONFIGURE_FILE(config.h.cmake config.h)
 
 SET(VERSION ${CRTN_VERSION})
-CONFIGURE_FILE(README.in README @ONLY)
+CONFIGURE_FILE(README.md.in README.md @ONLY)
 
 
 ADD_DEFINITIONS(-g -O2 -fsigned-char -freg-struct-return -Wall -W -Wshadow -Wstrict-prototypes -Wpointer-arith -Wcast-qual -Winline -Werror -pthread -D_GNU_SOURCE)
