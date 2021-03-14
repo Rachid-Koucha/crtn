@@ -17,7 +17,7 @@
 
 ## <a name="Introduction"></a>1 Introduction
 
-CoRouTiNe (CRTN) is an API which proposes coroutines in C language programs.
+CoRouTiNe (CRTN) is a shared library providing an API which proposes coroutines in C language programs. This is a set of services to manage concurrent execution flows. A coroutine can be suspended or resumed under the control of the user. The underlying operating system have no idea of their existence.
 
 CRTN is distributed under the GNU LGPL license.
 

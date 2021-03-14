@@ -8,14 +8,15 @@ The
 .B CRTN
 API is a set of services to manage concurrent execution flows in a program. They are named coroutines.
 A coroutine can be suspended or resumed under the control of the user. The underlying operating system
-have no idea of their existence. More precisely, they divide the execution flow of the main thread
-of a process into several ones.
+have no idea of their existence.
 
 .PP
 The service is based on GLIBC's services to save/restore the execution contexts of the coroutines.
 
 .PP
-The interface file of the API is <crtn.h>.
+The API is provided through a shared library named
+.BR libcrtn.so .
+The interface file is <crtn.h>.
 
 .PP
 A coroutine is created with
@@ -47,7 +48,7 @@ A standalone coroutine is by default always runnable. It suspends its execution 
 But it stays runnable and may be resumed at any moment when a call
 to
 .BR crtn_yield (3)
-is done by any other coroutine. 
+is done by any other coroutine. Internally, the scheduling is managed in a FIFO manner to make sure that a standalone corouting which relinquishes the CPU does not get it right away (unless it is the only runnable coroutine at the moment).
 
 .PP
 A coroutine terminates when it reaches the end of its entry point, when it calls
@@ -63,10 +64,11 @@ to get its termination status and to implicitly free the corresponding internal 
 The latter is an integer with a user defined signification.
 
 .PP
-Inter-coroutine communication/synchronization are provided with the mailboxes (cf.
-.BR crtn_mbx (3))
-and semaphores (cf.
-.BR crtn_sem (3)).
+Inter-coroutine communication/synchronization are provided: the mailboxes
+.BR "(" crtn_mbx "(3))"
+and semaphores
+.BR "(" crtn_sem "(3))."
+Those services are optional. They are set at package configuration time.
 
 .SH AUTHOR
 Rachid Koucha
