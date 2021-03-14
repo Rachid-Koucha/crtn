@@ -195,11 +195,7 @@ $ rpm -qp --requires crtn-0.1.0-1.x86_64.rpm
 ```
 ### 5.7 Notes about DEB package
 
-<<<<<<< HEAD:README.md.in
 Use the following to get information on a package file:
-=======
-. Use the following to get information on a package file:
->>>>>>> 322343ca01cc2c08fb85a003fdbe86ac9d8b0df1:README.in
 ```
 $ dpkg --info crtn_0.1.0_amd64.deb
 [...]
