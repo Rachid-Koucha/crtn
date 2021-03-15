@@ -270,7 +270,7 @@ In the following example, a secondary stepper coroutine generates the following 
 #include <signal.h>
 #include <limits.h>
 
-#include "crtn.h"
+#include <crtn.h>
 
 static int signaled;
 
