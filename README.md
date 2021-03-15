@@ -2,18 +2,18 @@
 
 [1 Introduction](#Introduction)  
 [2 Maintainers](#Maintainers)  
-[3 Build suite](#Build_suite)  
-[4 Download ](#Download)  
-[5 cmake](#cmake)  
-&nbsp;&nbsp;&nbsp;&nbsp;[5.1 crtn_install.sh script](#crtn_install_sh_scritpt)  
-&nbsp;&nbsp;&nbsp;&nbsp;[5.2 Build, installation, cleanup](#Build_installation_cleanup)  
-&nbsp;&nbsp;&nbsp;&nbsp;[5.3 Tests](#Tests)  
-&nbsp;&nbsp;&nbsp;&nbsp;[5.4 Tests coverage measurement](#Tests_coverage_measurement)  
-&nbsp;&nbsp;&nbsp;&nbsp;[5.5 Packaging](#Packaging)  
-&nbsp;&nbsp;&nbsp;&nbsp;[5.6 Notes about RPM package](#Notes_rpm)  
-&nbsp;&nbsp;&nbsp;&nbsp;[5.7 Notes about DEB package](#Notes_deb)  
-[6 Documentation](#Documentation)  
-[6.1 On line manuals](#On_lime_man)
+[3 Download ](#Download)  
+[4 Administration](#Administration)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.1 crtn_install.sh script](#crtn_install_sh_scritpt)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.2 Build, installation, cleanup](#Build_installation_cleanup)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.3 Tests](#Tests)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.4 Tests coverage measurement](#Tests_coverage_measurement)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.5 Packaging](#Packaging)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.6 Notes about RPM package](#Notes_rpm)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.7 Notes about DEB package](#Notes_deb)  
+[5 Documentation](#Documentation)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.1 Online manuals](#Online_man)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.2 Overview of the API](#API_overw)
 
 ## <a name="Introduction"></a>1 Introduction
 
@@ -30,22 +30,17 @@ The current document concerns the 0.1.0 version of the CRTN package.
 To report a bug or design enhancement, please contact [Rachid Koucha](mailto:rachid.koucha@gmail.com)
 
 
-## <a name="Build_suite"></a>3 Build suite
-
-CRTN is built with CMAKE.
-
-
-## <a name="Download"></a>4 Download
+## <a name="Download"></a>3 Download
 
 The source code is available on github. Use the following command to download it:
 ```
 $ git clone https://github.com/Rachid-Koucha/crtn.git
 ```
 
-## <a name="cmake"></a>5 cmake
+## <a name="Administration"></a>4 Administration
 
 
-### <a name="crtn_install_sh_scritpt"></a>5.1 crtn_install.sh script
+### <a name="crtn_install_sh_scritpt"></a>4.1 crtn_install.sh script
 
 
 This shell script is a swiss army knife to make several things. It implicitly uses `cmake`. Display its help:
@@ -77,7 +72,7 @@ Usage:
 Note that some options require super user privileges to run. Use `sudo` for example.
 
 
-### <a name="Build_installation_cleanup"></a>5.2 Build, installation, cleanup
+### <a name="Build_installation_cleanup"></a>4.2 Build, installation, cleanup
 
 
 * To build the library:
@@ -101,7 +96,7 @@ Note that some options require super user privileges to run. Use `sudo` for exam
 `$ ./crtn_install.sh -c`
 
 
-### <a name="Tests"></a>5.3 Tests
+### <a name="Tests"></a>4.3 Tests
 
 The regression tests are based on CHECK library. The latter must be installed
 prior to launch the tests.
@@ -113,7 +108,7 @@ $ ./crtn_install.sh -T
 100%: Checks: 31, Failures: 0, Errors: 0
 
 
-### <a name="Tests_coverage_measurement"></a>5.4 Tests coverage measurement
+### <a name="Tests_coverage_measurement"></a>4.4 Tests coverage measurement
 
 The test coverage measurement requires the `gcov/lcov` packages.
 
@@ -122,7 +117,7 @@ To trigger test coverage measurement for CRTN (with a display of the result in f
 `$ ./crtn_install.sh -C -b firefox`
 
 
-### <a name="Packaging"></a>5.5 Packaging
+### <a name="Packaging"></a>4.5 Packaging
 
 To make a tar gzip source package, use the `-A` option of `crtn_install.sh`:
 
@@ -144,7 +139,7 @@ This makes the following binary packages:
 * crtn-0.1.0-Linux-crtn.sh (STGZ)
         
 
-### <a name="Notes_rpm"></a>5.6 Notes about RPM package
+### <a name="Notes_rpm"></a>4.6 Notes about RPM package
 
 Use the following to get information on a package file:
 ```
@@ -165,7 +160,6 @@ Summary     : CRTN (CoRouTiNe API for C language)
 Description :
 CoRouTiNe API for C language
 ```
-
 Use the following to get the pre/post-installation scripts in a package file:
 ```
 $ rpm -qp --scripts rsys-0.1.0-1.x86_64.rpm
@@ -192,7 +186,7 @@ The required package list of an RPM file could be printed with:
 ```
 $ rpm -qp --requires crtn-0.1.0-1.x86_64.rpm
 ```
-### <a name="Notes_deb"></a>5.7 Notes about DEB package
+### <a name="Notes_deb"></a>4.7 Notes about DEB package
 
 Use the following to get information on a package file:
 ```
@@ -233,11 +227,11 @@ Use following to uninstall (remove) a package (super user rights required):
 $ sudo dpkg -r crtn
 ```
 
-## <a name="Documentation"></a>6 DOCUMENTATION
+## <a name="Documentation"></a>5 Documentation
 
-### <a name="On_lime_man"></a>6.1 On line manuals
+### <a name="Online_man"></a>5.1 Online manuals
 
-Once CRTN is installed, it is possible to access the corresponding on line manuals with:
+Once CRTN is installed, it is possible to access the corresponding online manuals with:
 ```
 $ man 7 crtn       # Overview of CRTN
 
@@ -247,3 +241,18 @@ $ man 3 crtn_mbx   # Manual of crtn mailbox service
 
 $ man 3 crtn_sem   # Manual of crtn semaphore service
 ```
+### <a name="API_overw"></a>5.2 Overview of the API
+
+A coroutine is created with crtn_spawn(3).  The latter returns a unique coroutine identifier (cid).
+
+The coroutines have several attributes set with the crtn_set_attr_xxx(3) service:
+* Two types of coroutines are provided: stackless and stackful.
+* Two scheduling types are provided: stepper and standalone. A stepper coroutine is by default suspended. A standalone coroutine is by default always runnable.
+
+A coroutine suspends itself calling crtn_yield(3). It is resumed when another coroutine calls crtn_yield(3) if it is standalone or crtn_wait(3) if it is stepper. 
+
+A coroutine terminates when it reaches the end of its entry point, when it calls crtn_exit(3) or when another coroutine calls crtn_cancel(3) to finish it.
+
+A  terminated coroutine stays in a zombie state until another coroutine calls crtn_join(3) to get its termination status and to implicitly free the corresponding internal data structures.  The latter is an integer with a user defined signification.
+
+Inter-coroutine communication/synchronization are provided: the mailboxes (crtn_mbx(3)) and semaphores (crtn_sem(3)). Those services are optional. They are set at package configuration time with the `-o` option of `crtn_install.sh` script.

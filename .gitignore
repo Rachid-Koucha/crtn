@@ -1,15 +1,15 @@
+# cmake
 CMakeCache.txt
 CMakeFiles/
 CPackConfig.cmake
 CPackSourceConfig.cmake
 Makefile
-README
 _CPack_Packages/
 cmake_uninstall.cmake
 cmake_install.cmake
 config.h
 
-# emacs
+# Emacs
 *~
 
 # Packaging
@@ -19,10 +19,12 @@ config.h
 crtn-*-Linux-crtn.sh
 crtn-*-Linux-crtn.tar.gz
 
-
+# Installation
 crtn.postinst
 install_manifest_crtn.txt
 todo.txt
+
+# Includes
 crtn.h
 
 # Build
@@ -31,12 +33,12 @@ crtn.h
 *.so.*
 
 
-# man
+# Manuals
 man/*.3
 man/*.7
 man/*.gz
 
-# tests
+# Tests
 tests/check_all
 tests/fibonacci
 tests/mywc
