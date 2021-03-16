@@ -51,6 +51,9 @@ ADD_EXECUTABLE(mywc1 wc1.c)
 TARGET_LINK_LIBRARIES(mywc1 crtn)
 
 if (${HAVE_CRTN_MBX} STREQUAL ON)
+  ADD_EXECUTABLE(mbx mbx.c)
+  TARGET_LINK_LIBRARIES(mbx crtn)
+
   ADD_EXECUTABLE(mywc2 wc2.c)
   TARGET_LINK_LIBRARIES(mywc2 crtn)
 endif()
@@ -60,6 +63,11 @@ TARGET_LINK_LIBRARIES(mywc3 crtn)
 
 ADD_EXECUTABLE(mywc4 wc4.c)
 TARGET_LINK_LIBRARIES(mywc4 crtn)
+
+if (${HAVE_CRTN_SEM} STREQUAL ON)
+  ADD_EXECUTABLE(mywc5 wc5.c)
+  TARGET_LINK_LIBRARIES(mywc5 crtn)
+endif()
 
 ADD_EXECUTABLE(fibonacci fibonacci.c)
 TARGET_LINK_LIBRARIES(fibonacci crtn)
@@ -72,3 +80,5 @@ TARGET_LINK_LIBRARIES(switch_ctx3 crtn)
 
 ADD_EXECUTABLE(sig sig.c)
 TARGET_LINK_LIBRARIES(sig crtn)
+
+

@@ -244,23 +244,23 @@ $ man 3 crtn_sem   # Manual of crtn semaphore service
 ```
 ### <a name="API_overw"></a>5.2 Overview of the API
 
-A coroutine is created with crtn_spawn(3).  The latter returns a unique coroutine identifier (cid).
+A coroutine is created with `crtn_spawn()`.  The latter returns a unique coroutine identifier (cid).
 
-The coroutines have several attributes set with the crtn_set_attr_xxx(3) service:
+The coroutines have several attributes set with the `crtn_set_attr_xxx()` service:
 * Two types of coroutines are provided: stackless and stackful.
 * Two scheduling types are provided: stepper and standalone. A stepper coroutine is by default suspended. A standalone coroutine is by default always runnable.
 
-A coroutine suspends itself calling crtn_yield(3). It is resumed when another coroutine calls crtn_yield(3) if it is standalone or crtn_wait(3) if it is stepper. 
+A coroutine suspends itself calling `crtn_yield()`. It is resumed when another coroutine calls `crtn_yield()` if it is standalone or `crtn_wait()` if it is stepper. 
 
-A coroutine terminates when it reaches the end of its entry point, when it calls crtn_exit(3) or when another coroutine calls crtn_cancel(3) to finish it.
+A coroutine terminates when it reaches the end of its entry point, when it calls `crtn_exit()` or when another coroutine calls `crtn_cancel()` to finish it.
 
-A  terminated coroutine stays in a zombie state until another coroutine calls crtn_join(3) to get its termination status and to implicitly free the corresponding internal data structures.  The latter is an integer with a user defined signification.
+A  terminated coroutine stays in a zombie state until another coroutine calls `crtn_join()` to get its termination status and to implicitly free the corresponding internal data structures.  The latter is an integer with a user defined signification.
 
-Inter-coroutine communication/synchronization are provided: the mailboxes (crtn_mbx(3)) and semaphores (crtn_sem(3)). Those services are optional. They are set at package configuration time with the `-o` option of `crtn_install.sh` script.
+Inter-coroutine communication/synchronization are provided: the mailboxes (`crtn_mbx()`) and semaphores (`crtn_sem()`). Those services are optional. They are set at package configuration time with the `-o` option of `crtn_install.sh` script.
 
 ### <a name="Ex_prog"></a>5.3 Example program
 
-In the following example, a secondary stepper coroutine generates the following term of the fibonacci sequence each time it is resumed by the main coroutine. The term is passed through
+In the following example, a secondary stepper coroutine generates the following term of the [fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number) each time it is resumed by the main coroutine. The term is passed through
 `crtn_wait()`. 
 
 ```c

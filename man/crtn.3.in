@@ -3,7 +3,7 @@
 crtn \- API of CoRouTiNe service
 .SH SYNOPSIS
 .nf
-\fB#include "crtn.h"\fP
+\fB#include <crtn.h>\fP
 .sp
 
 .PP

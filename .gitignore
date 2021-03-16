@@ -46,10 +46,12 @@ tests/mywc1
 tests/mywc2
 tests/mywc3
 tests/mywc4
+tests/mywc5
 tests/sig
 tests/switch_ctx2
 tests/switch_ctx3
 tests/tcrtn
+tests/mbx
 
 # Test coverage
 all_coverage/

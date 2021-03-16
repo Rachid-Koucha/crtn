@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// File        : wc4.c
+// File        : wc5.c
 // Description : Line, word, char counter
 // License     :
 //
@@ -44,12 +44,12 @@ static char buffer[BUFFER_SIZE];
 struct counter_t
 {
   size_t nb_chars;
+  size_t nb_spaces;
   size_t nb_words;
   size_t nb_lines;
 };
 
 struct counter_t cnts;
-
 
 
 
@@ -118,28 +118,32 @@ static int read_buffer(void)
 {
   if (r_offset == w_offset) {
     crtn_yield(0);
-    r_offset = 0;
   }
 
   cnts.nb_chars ++;
   return buffer[r_offset ++];
 } // read_buffer
 
-#define unread_buffer(c) do { \
+#define unread_buffer(c) do {           \
                   assert(r_offset > 0); \
-                  -- r_offset; \
-                  cnts.nb_chars --; \
+                  -- r_offset;          \
+                  cnts.nb_chars --;     \
                 } while(0)
 
 static void fill_buffer(void)
 {
   do {
 
-    w_offset = nb_read(0, buffer, BUFFER_SIZE);
+    // Upon EOF, nb_read() returns 1 with EOF in buffer[0]
+    w_offset = nb_read(0, buffer, BUFFER_SIZE - 1);
 
     // If no error, there is at least an EOF in the buffer
     if (w_offset > 0) {
-      crtn_yield(0);
+      buffer[w_offset] = 0;
+      r_offset = 0;
+      while (r_offset != w_offset && buffer[w_offset-1] != EOF) {
+        crtn_yield(0);
+      }
     }
 
   } while (w_offset > 0 && buffer[w_offset-1] != EOF);
@@ -147,85 +151,157 @@ static void fill_buffer(void)
 } // fill_buffer
 
 
-static void get_spaces(void)
+static int get_spaces(void *p)
 {
   int c;
+  crtn_sem_t sem = *((crtn_sem_t *)p);
+  int rc;
 
-  c = read_buffer();
-  while(isspace(c) && (c != '\n') && (c != EOF)) {
+  do {
+
+    rc = crtn_sem_p(sem);
+    if (rc != 0) {
+      fprintf(stderr, "crtn_sem_p(): error %d\n", crtn_errno());
+      return -1;
+    }
+
     c = read_buffer();
-  }
+    while(isspace(c) && (c != '\n') && (c != EOF)) {
+      cnts.nb_spaces ++;
+      c = read_buffer();
+    }
+    unread_buffer(c);
 
-  unread_buffer(c);
-  return;
+    rc = crtn_sem_v(sem);
+    if (rc != 0) {
+      fprintf(stderr, "crtn_sem_v(): error %d\n", crtn_errno());
+      return -1;
+    }
+
+    if (c == EOF) {
+      break;
+    }
+
+    crtn_yield(0);
+
+  } while(1);
+
+  return 0;
 
 } // get_spaces
 
-static void get_word(void)
+static int get_word(void *p)
 {
   int c;
+  size_t count;
+  crtn_sem_t sem = *((crtn_sem_t *)p);
+  int rc;
 
-  cnts.nb_words ++;
+  do {
 
-  c = read_buffer();
-  while(!isspace(c) && (c != EOF)) {
+    rc = crtn_sem_p(sem);
+    if (rc != 0) {
+      fprintf(stderr, "crtn_sem_p(): error %d\n", crtn_errno());
+      return -1;
+    }
+
+    count = cnts.nb_chars;
     c = read_buffer();
-  }
+    while(!isspace(c) && (c != EOF)) {
+      c = read_buffer();
+    }
+    unread_buffer(c);
+    if (cnts.nb_chars > count) {
+      cnts.nb_words ++;
+    }
 
-  unread_buffer(c);
-  return;
+    rc = crtn_sem_v(sem);
+    if (rc != 0) {
+      fprintf(stderr, "crtn_sem_v(): error %d\n", crtn_errno());
+      return -1;
+    }
+
+    if (c == EOF) {
+      break;
+    }
+
+    crtn_yield(0);
+
+  } while(1);
+
+  return 0;
 
 } // get_word
 
 
-static void get_lines(void)
+static int get_lines(void *p)
 {
+  crtn_sem_t sem = *((crtn_sem_t *)p);
   int c;
+  int rc;
 
-  c = read_buffer();
-  while(c == '\n') {
-    cnts.nb_lines ++;
+  do {
+
+    rc = crtn_sem_p(sem);
+    if (rc != 0) {
+      fprintf(stderr, "crtn_sem_p(): error %d\n", crtn_errno());
+      return -1;
+    }
+
     c = read_buffer();
-  }
+    while((c == '\n') && (c != EOF)) {
+      cnts.nb_lines ++;
+      c = read_buffer();
+    }
+    unread_buffer(c);
 
-  unread_buffer(c);
-  return;
+    rc = crtn_sem_v(sem);
+    if (rc != 0) {
+      fprintf(stderr, "crtn_sem_v(): error %d\n", crtn_errno());
+      return -1;
+    }
+
+    if (c == EOF) {
+      break;
+    }
+
+    crtn_yield(0);
+
+  } while(1);
+
+  return 0;
 
 } // get_lines
 
 
-static int counter(void *param)
-{
-  int c;
-
-  (void)param;
-
-  do {
-
-    c = read_buffer();
-    unread_buffer(c);
-    if (c == '\n') {
-      get_lines();
-    } else if (isspace(c)) {
-      get_spaces();
-    } else if (c != EOF) {
-      get_word();
-    }
-
-  } while (c != EOF);
-
-  return 0;
-  
-} // counter
-
-
 int main(void)
 {
-  crtn_t cid;
+  crtn_t cid_word, cid_spaces, cid_lines;
   int rc;
   int status;
+  crtn_sem_t sem;
 
-  rc = crtn_spawn(&cid, "Counter", counter, 0, 0);
+  rc = crtn_sem_new(&sem, 1);
+  if (rc != 0) {
+    fprintf(stderr, "Error %d\n", crtn_errno());
+    return 1;
+  }
+
+  rc = crtn_spawn(&cid_word, "word", get_word, &sem, 0);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  rc = crtn_spawn(&cid_lines, "lines", get_lines, &sem, 0);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  rc = crtn_spawn(&cid_spaces, "space", get_spaces, &sem, 0);
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
@@ -234,16 +310,36 @@ int main(void)
 
   fill_buffer();
 
-  rc = crtn_join(cid, &status);
+  rc = crtn_join(cid_word, &status);
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
     return 1;
   }
 
-  printf("Lines: %zu / Words: %zu / Characters: %zu\n"
+  rc = crtn_join(cid_spaces, &status);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  rc = crtn_join(cid_lines, &status);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  rc = crtn_sem_delete(sem);
+  if (rc != 0) {
+    fprintf(stderr, "Error %d\n", crtn_errno());
+    return 1;
+  }
+
+  printf("Lines: %zu / Words: %zu / Spaces: %zu / Characters: %zu\n"
          ,
-         cnts.nb_lines, cnts.nb_words, cnts.nb_chars
+         cnts.nb_lines, cnts.nb_words, cnts.nb_spaces, cnts.nb_chars
         );
 
   return status;

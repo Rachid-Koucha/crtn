@@ -1,9 +1,9 @@
-.TH CRTN 3  "FEBRUARY 2021" "API v0.1.0" "API v0.1.0"
+.TH CRTN 3  "FEBRUARY 2021" "API v@CRTN_VERSION@" "API v@CRTN_VERSION@"
 .SH NAME
 crtn_mbx \- Mailbox API of the CoRouTiNe service
 .SH SYNOPSIS
 .nf
-\fB#include "crtn.h"\fP
+\fB#include <crtn.h>\fP
 .sp
 
 .PP
@@ -140,6 +140,141 @@ when there are no more contexts to create a mailbox
 
 
 .SH EXAMPLES
+
+In the following example, two standalone coroutines are spawned by the main coroutine. The sender coroutine posts 5 messages in a mailbox. After each post,
+.BR crtn_yield (3)
+is called. This resumes the receiver coroutine which receives the messages posted in the mailbox. After each reception,
+.BR crtn_yield (3)
+is called to resume the sender. The main coroutine merely waits for the termination of both coroutines calling
+.BR crtn_join (3).
+
+.nf
+#include <stdio.h>
+#include <crtn.h>
+
+#define NB_MSG 5
+
+#define MSG_SZ 100
+
+static int sender(void *p)
+{
+  void *msg;
+  int rc;
+  crtn_mbx_t mbx = *((crtn_mbx_t *)p);
+  int i;
+
+  for (i = 0; i < NB_MSG; i ++) {
+
+    msg = crtn_mbx_alloc(MSG_SZ);
+    if (!msg) {
+      fprintf(stderr, "Error %d\n", crtn_errno());
+      return -1;
+    }
+
+    snprintf((char *)msg, MSG_SZ, "Message#%d", i);
+
+    rc = crtn_mbx_post(mbx, msg);
+    if (rc != 0) {
+      fprintf(stderr, "Error %d\n", crtn_errno());
+      return -1;
+    }
+
+    crtn_yield(0);
+  }
+
+  return i;
+} // sender
+
+
+static int receiver(void *p)
+{
+  void *msg;
+  int rc;
+  crtn_mbx_t mbx = *((crtn_mbx_t *)p);
+  int i;
+
+  for (i = 0; i < NB_MSG; i ++) {
+
+    rc = crtn_mbx_get(mbx, &msg);
+    if (rc != 0) {
+      fprintf(stderr, "Error %d\n", crtn_errno());
+      return -1;
+    }
+
+    printf("Received: '%s'\n", (char *)msg);
+
+    rc = crtn_mbx_free(msg);
+    if (rc != 0) {
+      fprintf(stderr, "Error %d\n", crtn_errno());
+      return -1;
+    }
+
+    crtn_yield(0);
+  }
+
+  return i;
+} // receiver
+
+
+
+
+int main(void)
+{
+  int rc;
+  crtn_mbx_t mbx;
+  crtn_t cid, cid1;
+  int status, status1;
+
+  rc = crtn_mbx_new(&mbx);
+  if (rc != 0) {
+    fprintf(stderr, "Error %d\n", crtn_errno());
+    return 1;
+  }
+
+  rc = crtn_spawn(&cid, "Sender", sender, &mbx, 0);
+  if (rc != 0) {
+    fprintf(stderr, "Error %d\n", crtn_errno());
+    return 1;
+  }
+
+  rc = crtn_spawn(&cid1, "Receiver", receiver, &mbx, 0);
+  if (rc != 0) {
+    fprintf(stderr, "Error %d\n", crtn_errno());
+    return 1;
+  }
+
+  rc = crtn_join(cid, &status);
+  if (rc != 0) {
+    fprintf(stderr, "Error %d\n", crtn_errno());
+    return 1;
+  }
+
+  rc = crtn_join(cid1, &status1);
+  if (rc != 0) {
+    fprintf(stderr, "Error %d\n", crtn_errno());
+    return 1;
+  }
+
+  rc = crtn_mbx_delete(mbx);
+  if (rc != 0) {
+    fprintf(stderr, "Error %d\n", crtn_errno());
+    return 1;
+  }
+
+  return 0;
+}
+.sp
+
+The execution displays:
+
+.nf
+$ mbx 
+Received: 'Message#0'
+Received: 'Message#1'
+Received: 'Message#2'
+Received: 'Message#3'
+Received: 'Message#4'
+.sp
 
 .SH AUTHOR
 Rachid Koucha

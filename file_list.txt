@@ -67,6 +67,8 @@
 ./tests/wc2.c
 ./tests/wc3.c
 ./tests/wc4.c
+./tests/wc5.c
+./tests/mbx.c
 ./tests/check_all.c
 ./tests/check_all.h
 ./tests/check_crtn.h
