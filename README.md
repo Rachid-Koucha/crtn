@@ -18,11 +18,15 @@
 
 ## <a name="Introduction"></a>1 Introduction
 
-CoRouTiNe (CRTN) is a shared library providing an API which proposes coroutines in C language programs. This is a set of services to manage concurrent execution flows. A coroutine can be suspended or resumed under the control of the user. The underlying operating system have no idea of their existence.
+CoRouTiNe (`crtn`) is a shared library providing an API which proposes coroutines in C language programs. This is a set of services to manage concurrent execution flows. A coroutine can be suspended or resumed under the control of the user. The underlying operating system have no idea of their existence.
 
-CRTN is distributed under the GNU LGPL license.
+The service is an abstraction layer on top of the GLIBC:
 
-The current document concerns the 0.1.0 version of the CRTN package.
+<p align="center"><img src="doc/crtn_layers.png"></p>
+
+`crtn` is distributed under the GNU LGPL license.
+
+The current document concerns the 0.1.1 version of the `crtn` package.
 
 
 ## <a name="Maintainers"></a>2 Maintainers
@@ -33,7 +37,7 @@ To report a bug or design enhancement, please contact [Rachid Koucha](mailto:rac
 
 ## <a name="Download"></a>3 Download
 
-The source code is available on github. Use the following command to download it:
+The source code is available on github. Use the following command to clone it:
 ```
 $ git clone https://github.com/Rachid-Koucha/crtn.git
 ```
@@ -44,7 +48,7 @@ $ git clone https://github.com/Rachid-Koucha/crtn.git
 ### <a name="crtn_install_sh_scritpt"></a>4.1 crtn_install.sh script
 
 
-This shell script is a swiss army knife to make several things. It implicitly uses `cmake`. Display its help:
+This shell script is a swiss army knife to make several things. It implicitly uses `cmake`. To display the help, use the `-h` option:
 
 ```
 $ ./crtn_install.sh -h
@@ -70,7 +74,7 @@ Usage:
    (*) Super user rights required
 ```
 
-Note that some options require super user privileges to run. Use `sudo` for example.
+Note that some options require super user privileges. Use `sudo` for example.
 
 
 ### <a name="Build_installation_cleanup"></a>4.2 Build, installation, cleanup
@@ -84,7 +88,7 @@ Note that some options require super user privileges to run. Use `sudo` for exam
 
 `$ ./crtn_install.sh -B -o mbx -o sem`
 
-* For a complete installation in the default /usr/local subtree (super user rights required):
+* For a complete installation in the default _/usr/local_ subtree (super user rights required):
 
 `$ sudo ./crtn_install.sh -I`
 
@@ -99,15 +103,15 @@ Note that some options require super user privileges to run. Use `sudo` for exam
 
 ### <a name="Tests"></a>4.3 Tests
 
-The regression tests are based on CHECK library. The latter must be installed
-prior to launch the tests.
+The regression tests are based on _Check_ library. The latter must be installed
+prior launching the tests.
 
 To trigger the regression tests for the whole software:
-
+```
 $ ./crtn_install.sh -T
 [...]
 100%: Checks: 31, Failures: 0, Errors: 0
-
+```
 
 ### <a name="Tests_coverage_measurement"></a>4.4 Tests coverage measurement
 
@@ -124,35 +128,35 @@ To make a tar gzip source package, use the `-A` option of `crtn_install.sh`:
 
 `$ ./crtn_install.sh -A`
 
-This makes a TGZ file of the complete source tree: crtn_src-0.1.0.tgz
+This makes a `tgz` file of the complete source tree: _crtn_src-0.1.1.tgz_
 
 
-It is also possible to generate Debian (DEB), Red-Hat Package Manager (RPM), Tar GZipped (TGZ) and Self Extracting Tar GZipped (STGZ) binary packages.
+It is also possible to generate Debian (_deb_), Red-Hat Package Manager (_rpm_), Tar GZipped (_tgz_) and Self Extracting Tar GZipped (_stgz_) binary packages.
 
-To build the packages TGZ, DEB, RPM... (super user rights required):
+To build the packages _tgz_, _deb_, _rpm_... (super user rights required):
 
 `$ sudo ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz`
 
 This makes the following binary packages:
-* crtn_0.1.0_amd64.deb (DEB)
-* crtn-0.1.0-1.x86_64.rpm (RPM)
-* crtn-0.1.0-Linux-crtn.tar.gz (TGZ)
-* crtn-0.1.0-Linux-crtn.sh (STGZ)
+* _crtn_0.1.1_amd64.deb (deb)_
+* _crtn-0.1.1-1.x86_64.rpm (rpm)_
+* _crtn-0.1.1-Linux-crtn.tar.gz (tgz)_
+* _crtn-0.1.1-Linux-crtn.sh (stgz)_
         
 
 ### <a name="Notes_rpm"></a>4.6 Notes about RPM package
 
-Use the following to get information on a package file:
+To get information on a package file:
 ```
-$ rpm -qp --info crtn-0.1.0-1.x86_64.rpm
+$ rpm -qp --info crtn-0.1.1-1.x86_64.rpm
 Name        : crtn
-Version     : 0.1.0
+Version     : 0.1.1
 Release     : 1
 Architecture: x86_64
 [...]
 License     : GPL/LGPL
 Signature   : (none)
-Source RPM  : crtn-0.1.0-1.src.rpm
+Source RPM  : crtn-0.1.1-1.src.rpm
 [...]
 Relocations : /usr/local 
 Vendor      : Rachid Koucha
@@ -161,9 +165,9 @@ Summary     : CRTN (CoRouTiNe API for C language)
 Description :
 CoRouTiNe API for C language
 ```
-Use the following to get the pre/post-installation scripts in a package file:
+To get the pre/post-installation scripts in a package file:
 ```
-$ rpm -qp --scripts rsys-0.1.0-1.x86_64.rpm
+$ rpm -qp --scripts rsys-0.1.1-1.x86_64.rpm
 preinstall program: /bin/sh
 postinstall scriptlet (using /bin/sh):
 
@@ -175,26 +179,26 @@ FILE=${INSTALL_PREFIX}/lib/cmake/FindRsys.cmake
 chmod 644  ${FILE}
 [...]
 ```
-Use following to list the files for an INSTALLED package:
+To list the files for an INSTALLED package:
 ```
 $ rpm -ql crtn
 ```
-Use following to list the files in a package file:
+To list the files in a package file:
 ```
-$ rpm -ql crtn-0.1.0-1.x86_64.rpm
+$ rpm -ql crtn-0.1.1-1.x86_64.rpm
 ```
-The required package list of an RPM file could be printed with:
+The required package list of an _rpm_ file could be printed with:
 ```
-$ rpm -qp --requires crtn-0.1.0-1.x86_64.rpm
+$ rpm -qp --requires crtn-0.1.1-1.x86_64.rpm
 ```
 ### <a name="Notes_deb"></a>4.7 Notes about DEB package
 
-Use the following to get information on a package file:
+To get information on a package file:
 ```
-$ dpkg --info crtn_0.1.0_amd64.deb
+$ dpkg --info crtn_0.1.1_amd64.deb
 [...]
  Package: crtn
- Version: 0.1.0
+ Version: 0.1.1
  Section: devel
  Priority: optional
  Architecture: amd64
@@ -203,13 +207,13 @@ $ dpkg --info crtn_0.1.0_amd64.deb
  Maintainer: Rachid Koucha <rachid dot koucha at gmail dot com>
  Description: CoRouTiNe API for C language
 ```
-Use following to list the files in a package file:
+To list the files in a package file:
 ```
-$ dpkg -c crtn_0.1.0_amd64.deb
+$ dpkg -c crtn_0.1.1_amd64.deb
 ```
-Use following to install the content of a package file (super user rights required):
+To install the content of a package file (super user rights required):
 ```
-$ sudo dpkg -i crtn_0.1.0_amd64.deb
+$ sudo dpkg -i crtn_0.1.1_amd64.deb
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/include/
@@ -218,12 +222,12 @@ drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/lib/
 lrwxrwxrwx root/root         0 2021-03-12 20:06 ./usr/local/lib/libcrtn.so
 [...]
 ```
-Use the following to list the installed packages:
+To list the installed packages:
 ```
 $ dpkg -l | grep crtn
-ii  crtn  0.1.0    amd64   CoRouTiNe API for C language
+ii  crtn  0.1.1    amd64   CoRouTiNe API for C language
 ```
-Use following to uninstall (remove) a package (super user rights required):
+To uninstall (remove) a package (super user rights required):
 ```
 $ sudo dpkg -r crtn
 ```
@@ -242,26 +246,34 @@ $ man 3 crtn_mbx   # Manual of crtn mailbox service
 
 $ man 3 crtn_sem   # Manual of crtn semaphore service
 ```
+The latters provide some small example programs in their _EXAMPLES_ section.
 ### <a name="API_overw"></a>5.2 Overview of the API
 
 A coroutine is created with `crtn_spawn()`.  The latter returns a unique coroutine identifier (cid).
 
-The coroutines have several attributes set with the `crtn_set_attr_xxx()` service:
-* Two types of coroutines are provided: stackless and stackful.
-* Two scheduling types are provided: stepper and standalone. A stepper coroutine is by default suspended. A standalone coroutine is by default always runnable.
+The coroutines have several attributes set with the `crtn_set_attr_xxx()` services:
+* Two types of coroutines are provided: `stackless` and `stackful` (default).
+* Two scheduling types are provided: `stepper` and `standalone` (default). A stepper coroutine is by default suspended. A standalone coroutine is by default always runnable.
 
-A coroutine suspends itself calling `crtn_yield()`. It is resumed when another coroutine calls `crtn_yield()` if it is standalone or `crtn_wait()` if it is stepper. 
+A coroutine suspends itself calling `crtn_yield()`. It is resumed when another coroutine calls `crtn_yield()` if it is standalone or `crtn_wait()` if it is stepper.
+
+A stepper coroutine can pass the address of some data to `crtn_yield()`. The coroutine waiting for it, gets those data with the pointer passed to `crtn_wait()`. 
 
 A coroutine terminates when it reaches the end of its entry point, when it calls `crtn_exit()` or when another coroutine calls `crtn_cancel()` to finish it.
 
 A  terminated coroutine stays in a zombie state until another coroutine calls `crtn_join()` to get its termination status and to implicitly free the corresponding internal data structures.  The latter is an integer with a user defined signification.
 
-Inter-coroutine communication/synchronization are provided: the mailboxes (`crtn_mbx()`) and semaphores (`crtn_sem()`). Those services are optional. They are set at package configuration time with the `-o` option of `crtn_install.sh` script.
+The state diagram of a coroutine is depicted in the following figure:
+
+<p align="center"><img src="doc/crtn_state_diagram.png"></p>
+
+Additional inter-coroutine communication and synchronization are optionally provided:
+- The mailboxes (`crtn_mbx_new()`, `crtn_mbx_post()`, `crtn_mbx_get()`...). They are provided with the `-o mbx` option of the `crtn_install.sh` script;
+- The semaphores (`crtn_sem_new()`, `crtn_sem_p()`, `crtn_sem_v()`...). They are provided with the `-o sem` option of the `crtn_install.sh` script.
 
 ### <a name="Ex_prog"></a>5.3 Example program
 
-In the following example, a secondary stepper coroutine generates the following term of the [fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number) each time it is resumed by the main coroutine. The term is passed through
-`crtn_wait()`. 
+In the following example, the main coroutine creates a secondary coroutines with the `stepper` attribute. The secondary coroutine generates the following term of the [fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number) each time it is resumed by the main coroutine. The term is passed through `crtn_wait()`. 
 
 ```c
 #include <errno.h>
@@ -300,11 +312,11 @@ start:
   crtn_yield(&cur);
 
   while (1) {
-    cur = prevn + prevn_1;
     // Check overflow
     if ((ULLONG_MAX - prevn_1) < prevn) {
       goto start;
     }
+    cur = prevn + prevn_1;
     crtn_yield(&cur);
     prevn_1 = prevn;
     prevn = cur;
@@ -390,7 +402,6 @@ int main(void)
 
 } // main
 ```
-
 The execution displays:
 
 ```
@@ -411,3 +422,4 @@ seq[12]=144
 seq[13]=233
 ^CSignal 2...
 ```
+Many other example programs are available in the _tests_ sub-directory of the source code tree.
