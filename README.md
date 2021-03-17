@@ -28,7 +28,6 @@ The service is an abstraction layer on top of the GLIBC:
 
 The current document concerns the 0.1.1 version of the `crtn` package.
 
-
 ## <a name="Maintainers"></a>2 Maintainers
 
 
@@ -130,7 +129,6 @@ To make a tar gzip source package, use the `-A` option of `crtn_install.sh`:
 
 This makes a `tgz` file of the complete source tree: _crtn_src-0.1.1.tgz_
 
-
 It is also possible to generate Debian (_deb_), Red-Hat Package Manager (_rpm_), Tar GZipped (_tgz_) and Self Extracting Tar GZipped (_stgz_) binary packages.
 
 To build the packages _tgz_, _deb_, _rpm_... (super user rights required):
@@ -142,7 +140,6 @@ This makes the following binary packages:
 * _crtn-0.1.1-1.x86_64.rpm (rpm)_
 * _crtn-0.1.1-Linux-crtn.tar.gz (tgz)_
 * _crtn-0.1.1-Linux-crtn.sh (stgz)_
-        
 
 ### <a name="Notes_rpm"></a>4.6 Notes about RPM package
 
