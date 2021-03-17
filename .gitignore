@@ -9,6 +9,7 @@ cmake_uninstall.cmake
 cmake_install.cmake
 config.h
 
+
 # Emacs
 *~
 
@@ -22,6 +23,7 @@ crtn-*-Linux-crtn.tar.gz
 # Installation
 crtn.postinst
 install_manifest_crtn.txt
+install_manifest.txt
 todo.txt
 
 # Includes

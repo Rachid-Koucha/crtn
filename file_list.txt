@@ -27,6 +27,9 @@
 ./lib/crtn_mbx.c
 ./lib/crtn_sem.c
 
+doc/crtn_layers.png
+doc/crtn_state_diagram.png
+
 ./man/CMakeLists.txt
 ./man/crtn.3.in
 ./man/crtn_cancel.3

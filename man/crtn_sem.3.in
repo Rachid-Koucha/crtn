@@ -46,12 +46,19 @@ The
 .BR crtn_sem_v ()
 function increments the semaphore identified by
 .IR sem .
+This makes runnable any coroutine waiting on the semaphore through the call to
+.BR crtn_sem_p ().
+The next call to
+.BR crtn_yield ()
+will resume them.
 
 .PP
 The
 .BR crtn_sem_p ()
 function decrements the semaphore identified by
 .IR sem .
+If the semaphore value was 0, the calling coroutine is suspended until
+the value of the semaphore becomes greater than 0. An implicit yield operation is done to let any runnable standalone coroutine get the processor.
 
 
 .SH RETURN VALUE

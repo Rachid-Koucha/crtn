@@ -56,7 +56,8 @@ The
 .BR crtn_mbx_tryget ()
 function behaves the same as
 .B crtn_mbx_get()
-except that it returns even if the mailbox is empty.
+except that it returns if the mailbox is empty. This is typically used to
+check if there are pending messages without suspending the calling coroutine if the mailbox is empty.
 
 .PP
 The
@@ -65,6 +66,12 @@ function posts the message pointed by
 .I msg
 into the mailbox identified by
 .BR mbx .
+This makes runnable any coroutine waiting on the mailbox through the call to
+.BR crtn_sem_p ().
+The next call to
+.BR crtn_yield ()
+will resume them.
+
 
 .PP
 The

@@ -63,11 +63,11 @@ start:
   crtn_yield(&cur);
 
   while (1) {
-    cur = prevn + prevn_1;
     // Check overflow
     if ((ULLONG_MAX - prevn_1) < prevn) {
       goto start;
     }
+    cur = prevn + prevn_1;
     crtn_yield(&cur);
     prevn_1 = prevn;
     prevn = cur;
