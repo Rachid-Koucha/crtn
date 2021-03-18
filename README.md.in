@@ -271,13 +271,15 @@ The state diagram of a coroutine is depicted in the following figure:
 
 <p align="center"><img src="doc/crtn_state_diagram.png"></p>
 
-Additional inter-coroutine communication and synchronization are optionally provided:
-- The mailboxes (`crtn_mbx_new()`, `crtn_mbx_post()`, `crtn_mbx_get()`...). They are provided with the `-o mbx` option of the `crtn_install.sh` script;
-- The semaphores (`crtn_sem_new()`, `crtn_sem_p()`, `crtn_sem_v()`...). They are provided with the `-o sem` option of the `crtn_install.sh` script.
+The scheduling is FIFO oriented. Any coroutine becoming runnable, is put at the beginning of the list. Any running (standalone) coroutine yielding the CPU goes at the end of the list. This minimizes CPU starvation.
+
+Additional inter-coroutine communication and synchronization are optionally provided with the `-o` option of the `crtn_install.sh` script:
+- The mailboxes (`crtn_mbx_new()`, `crtn_mbx_post()`, `crtn_mbx_get()`...). They are provided with `-o mbx`;
+- The semaphores (`crtn_sem_new()`, `crtn_sem_p()`, `crtn_sem_v()`...). They are provided with `-o sem`.
 
 ### <a name="Ex_prog"></a>5.3 Example program
 
-In the following example, the main coroutine creates a secondary coroutines with the `stepper` attribute. The secondary coroutine generates the following term of the [fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number) each time it is resumed by the main coroutine. The term is passed through `crtn_wait()`. 
+In the following example, the main coroutine creates a secondary coroutines with the `stepper` attribute and resumes it every seconds. The secondary coroutine generates the following term of the [fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number) each time it is resumed by the main coroutine. The term is passed through `crtn_wait()`. 
 
 ```c
 #include <errno.h>
