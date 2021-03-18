@@ -41,6 +41,10 @@ The source code is available on github. Use the following command to clone it:
 ```
 $ git clone https://github.com/Rachid-Koucha/crtn.git
 ```
+The source tree is:
+
+<p align="center"><img src="doc/crtn_source_tree.png"></p>
+
 
 ## <a name="Administration"></a>4 Administration
 
