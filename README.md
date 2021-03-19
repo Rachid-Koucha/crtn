@@ -125,6 +125,10 @@ To trigger test coverage measurement for CRTN (with a display of the result in f
 
 `$ ./crtn_install.sh -C -b firefox`
 
+This shows something like this in the browser:
+
+<p align="center"><img src="doc/crtn_coverage.png"></p>
+
 
 ### <a name="Packaging"></a>4.5 Packaging
 
