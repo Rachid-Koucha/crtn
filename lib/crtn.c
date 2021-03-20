@@ -24,6 +24,8 @@
 // Evolutions  :
 //
 //     08-Feb-2021 R. Koucha      - Creation
+//     20-Mar-2021 R. Koucha      - Fixed FIFO scheduling
+//                                - Return value for crtn_yield()
 //
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -168,7 +170,7 @@ crtn_t crtn_self(void)
 void crtn_make_runnable(crtn_link_t *link)
 {
   CRTN_LINK2CCB(link)->state = CRTN_STATE_RUNNABLE;
-  CRTN_LIST_ADD_FRONT(&crtn_runnable_list, link);
+  CRTN_LIST_ADD_TAIL(&crtn_runnable_list, link);
 }
 
 
@@ -185,8 +187,9 @@ void crtn_make_waiting(
 }
 
 
-void crtn_yield(void *data)
+int crtn_yield(void *data)
 {
+  int rc;
   crtn_link_t *plink;
   crtn_ccb_t *next_ccb;
   crtn_ccb_t *old_ccb;
@@ -226,6 +229,8 @@ void crtn_yield(void *data)
         crtn_current->state = CRTN_STATE_RUNNING;
         swapcontext(&(old_ccb->ctx), &(next_ccb->ctx));
 
+        rc = CRTN_SCHED_OTHER;
+
       } else {
 
         // The coroutine is STANDALONE, it decided to give the processor
@@ -255,6 +260,10 @@ void crtn_yield(void *data)
           crtn_current = next_ccb;
           crtn_current->state = CRTN_STATE_RUNNING;
           swapcontext(&(old_ccb->ctx), &(next_ccb->ctx));
+
+          rc = CRTN_SCHED_OTHER;
+        } else {
+          rc = CRTN_SCHED_SELF;
         }
       }
     }
@@ -297,6 +306,7 @@ void crtn_yield(void *data)
       crtn_current->state = CRTN_STATE_RUNNING;
       swapcontext(&(old_ccb->ctx), &(next_ccb->ctx));
 
+      rc = CRTN_SCHED_OTHER;
     }
     break;
 
@@ -317,6 +327,7 @@ void crtn_yield(void *data)
       crtn_current->state = CRTN_STATE_RUNNING;
       swapcontext(&(old_ccb->ctx), &(next_ccb->ctx));
 
+      rc = CRTN_SCHED_OTHER;
     }
     break;
 
@@ -324,10 +335,15 @@ void crtn_yield(void *data)
 
       assert(0);
 
+      crtn_set_errno(ENOSYS);
+      rc = -1;
+
     }
     break;
 
   } // End switch
+
+  return rc;
 
 } // crtn_yield
 
@@ -817,34 +833,15 @@ crtn_ccb_t *ccb, *ccb1;
     __CRTN_FALLTHROUGH
 
     case CRTN_STATE_READY: {
-
-      // Put the target coroutine at the beginning of
+      // Put the target coroutine at the end of
       // the runnable queue and change its state to runnable
       crtn_make_runnable(&(ccb->link));
-
     }
     break;
 
     default: {
-
-      crtn_link_t *plink;
-
       // The target coroutine is in runnable state
       assert(ccb->state == CRTN_STATE_RUNNABLE);
-
-      // Get the descriptor of the first coroutine in the runnable queue
-      plink = CRTN_LIST_FRONT(&crtn_runnable_list);
-
-      // If target coroutine is not the next coroutine to schedule
-      if (plink != &(ccb->link)) {
-
-        // Unlink the coroutine
-        CRTN_LIST_DEL(&(ccb->link));
-
-        // Put the target coroutine at the beginning of the runnable queue
-        CRTN_LIST_ADD_FRONT(&crtn_runnable_list, &(ccb->link)); 
-      }
-
     }
     break;
 
@@ -888,7 +885,7 @@ void crtn_lib_init(void)
   // Put the MAIN coroutine in the runnable list
   crtn_make_runnable(&(ccb->link));
 
-  // Main is the running coroutine
+  // Main is the first running coroutine
   ccb->state = CRTN_STATE_RUNNING;
 } // crtn_lib_init
 
