@@ -13,7 +13,7 @@ cmake_policy(SET CMP0048 NEW)
 #           PROJECT_DESCRIPTION, crtn_DESCRIPTION
 #           PROJECT_HOMEPAGE_URL, crtn_HOMEPAGE_URL
 PROJECT(crtn
-        VERSION 0.1.1
+        VERSION 0.2.0
         DESCRIPTION "CoRouTiNe API for C language"
         HOMEPAGE_URL "https://github.com/Rachid-Koucha/crtn"
         LANGUAGES C)

@@ -26,7 +26,7 @@ The service is an abstraction layer on top of the GLIBC:
 
 `crtn` is distributed under the GNU LGPL license.
 
-The current document concerns the 0.1.1 version of the `crtn` package.
+The current document concerns the 0.2.0 version of the `crtn` package.
 
 
 ## <a name="Maintainers"></a>2 Maintainers
@@ -136,7 +136,7 @@ To make a tar gzip source package, use the `-A` option of `crtn_install.sh`:
 
 `$ ./crtn_install.sh -A`
 
-This makes a `tgz` file of the complete source tree: _crtn_src-0.1.1.tgz_
+This makes a `tgz` file of the complete source tree: _crtn_src-0.2.0.tgz_
 
 
 It is also possible to generate Debian (_deb_), Red-Hat Package Manager (_rpm_), Tar GZipped (_tgz_) and Self Extracting Tar GZipped (_stgz_) binary packages.
@@ -146,25 +146,25 @@ To build the packages _tgz_, _deb_, _rpm_... (super user rights required):
 `$ sudo ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz`
 
 This makes the following binary packages:
-* _crtn_0.1.1_amd64.deb (deb)_
-* _crtn-0.1.1-1.x86_64.rpm (rpm)_
-* _crtn-0.1.1-Linux-crtn.tar.gz (tgz)_
-* _crtn-0.1.1-Linux-crtn.sh (stgz)_
+* _crtn_0.2.0_amd64.deb (deb)_
+* _crtn-0.2.0-1.x86_64.rpm (rpm)_
+* _crtn-0.2.0-Linux-crtn.tar.gz (tgz)_
+* _crtn-0.2.0-Linux-crtn.sh (stgz)_
         
 
 ### <a name="Notes_rpm"></a>4.6 Notes about RPM package
 
 To get information on a package file:
 ```
-$ rpm -qp --info crtn-0.1.1-1.x86_64.rpm
+$ rpm -qp --info crtn-0.2.0-1.x86_64.rpm
 Name        : crtn
-Version     : 0.1.1
+Version     : 0.2.0
 Release     : 1
 Architecture: x86_64
 [...]
 License     : GPL/LGPL
 Signature   : (none)
-Source RPM  : crtn-0.1.1-1.src.rpm
+Source RPM  : crtn-0.2.0-1.src.rpm
 [...]
 Relocations : /usr/local 
 Vendor      : Rachid Koucha
@@ -175,7 +175,7 @@ CoRouTiNe API for C language
 ```
 To get the pre/post-installation scripts in a package file:
 ```
-$ rpm -qp --scripts rsys-0.1.1-1.x86_64.rpm
+$ rpm -qp --scripts rsys-0.2.0-1.x86_64.rpm
 preinstall program: /bin/sh
 postinstall scriptlet (using /bin/sh):
 
@@ -193,20 +193,20 @@ $ rpm -ql crtn
 ```
 To list the files in a package file:
 ```
-$ rpm -ql crtn-0.1.1-1.x86_64.rpm
+$ rpm -ql crtn-0.2.0-1.x86_64.rpm
 ```
 The required package list of an _rpm_ file could be printed with:
 ```
-$ rpm -qp --requires crtn-0.1.1-1.x86_64.rpm
+$ rpm -qp --requires crtn-0.2.0-1.x86_64.rpm
 ```
 ### <a name="Notes_deb"></a>4.7 Notes about DEB package
 
 To get information on a package file:
 ```
-$ dpkg --info crtn_0.1.1_amd64.deb
+$ dpkg --info crtn_0.2.0_amd64.deb
 [...]
  Package: crtn
- Version: 0.1.1
+ Version: 0.2.0
  Section: devel
  Priority: optional
  Architecture: amd64
@@ -217,11 +217,11 @@ $ dpkg --info crtn_0.1.1_amd64.deb
 ```
 To list the files in a package file:
 ```
-$ dpkg -c crtn_0.1.1_amd64.deb
+$ dpkg -c crtn_0.2.0_amd64.deb
 ```
 To install the content of a package file (super user rights required):
 ```
-$ sudo dpkg -i crtn_0.1.1_amd64.deb
+$ sudo dpkg -i crtn_0.2.0_amd64.deb
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/include/
@@ -233,7 +233,7 @@ lrwxrwxrwx root/root         0 2021-03-12 20:06 ./usr/local/lib/libcrtn.so
 To list the installed packages:
 ```
 $ dpkg -l | grep crtn
-ii  crtn  0.1.1    amd64   CoRouTiNe API for C language
+ii  crtn  0.2.0    amd64   CoRouTiNe API for C language
 ```
 To uninstall (remove) a package (super user rights required):
 ```

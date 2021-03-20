@@ -13,6 +13,7 @@ config.h
 # Emacs
 *~
 .#*
+\#*#
 
 # Packaging
 *.rpm
