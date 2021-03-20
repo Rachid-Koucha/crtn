@@ -18,7 +18,7 @@ crtn \- API of CoRouTiNe service
 .BI "int crtn_set_attr_type(crtn_attr_t " attr ", unsigned int " type ");"
 .BI "int crtn_set_attr_stack_size(crtn_attr_t " attr ", size_t " stack_size ");"
 .PP
-.BI "void crtn_yield(void *" data ");"
+.BI "int crtn_yield(void *" data ");"
 .BI "int crtn_join(crtn_t " cid ", int *" status ");"
 .BI "int crtn_wait(crtn_t " cid ", void **" ret ");"
 .BI "void crtn_exit(int " status ");"
@@ -122,8 +122,12 @@ The
 .BR crtn_yield ()
 function suspends the calling coroutine. It may eventually pass the address of some
 .I data
-to some another coroutine waiting on it with
+to another coroutine waiting on it with
 .BR "crtn_wait()".
+.B CRTN_SCHED_OTHER
+is returned if the call resumed another coroutine.
+.B CRTN_SCHED_SELF
+is returned if the call did not resume another coroutine. The calling coroutine is the only runnable coroutine.
 
 .PP
 The
@@ -181,6 +185,15 @@ by the calling coroutine.
 and
 .BR crtn_cancel ()
 return 0 on success; on error, \-1 is returned, and
+.I errno
+is set to indicate the error.
+
+.BR crtn_yield ()
+returns either
+.B CRTN_SCHED_OTHER
+or
+.B CRTN_SCHED_SELF
+on success; on error, \-1 is returned, and
 .I errno
 is set to indicate the error.
 

@@ -108,7 +108,11 @@ extern int crtn_spawn(
                       crtn_attr_t   attr
                      );
 
-extern void crtn_yield(void *data);
+
+#define CRTN_SCHED_OTHER  0
+#define CRTN_SCHED_SELF   1
+
+extern int crtn_yield(void *data);
 
 extern crtn_t crtn_self(void);
 

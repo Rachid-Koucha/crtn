@@ -62,9 +62,12 @@ static int entry(void *p)
 
 static int entry1(void *p)
 {
+  int rc;
+
   (void)p;
 
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   return 0;
 }
@@ -114,7 +117,8 @@ unsigned int i;
   ck_assert_int_eq(rc, 0);
 
   // Make foo start and finish
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   rc = crtn_join(cid, &status);
   ck_assert_int_eq(rc, 0);
@@ -125,7 +129,8 @@ unsigned int i;
   ck_assert_int_eq(rc, 0);
 
   // Make foo start: it calls crtn_yield()
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   rc = crtn_join(cid, &status);
   ck_assert_int_eq(rc, 0);
@@ -159,7 +164,9 @@ unsigned int i;
   ck_assert_int_eq(rc, 0);
 
   // Start coroutine
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
+
 
   rc = crtn_join(cid, &status);
   ck_assert_int_eq(rc, 0);
@@ -190,7 +197,8 @@ unsigned int i;
   ck_assert_int_eq(rc, 0);
 
   // Start coroutine
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   // The standalone coroutine is in the runnable list
   // suspended on crtn_yield()
@@ -259,7 +267,8 @@ crtn_attr_t attr;
   ck_assert_int_eq(rc, 0);
 
   // Start the coroutine
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   rc = crtn_join(cid, &status);
   ck_assert_int_eq(rc, 0);
@@ -315,15 +324,18 @@ END_TEST
 
 static int entry20(void *p)
 {
+  int rc;
   int value;
 
   (void)p;
 
   value = 1;
-  crtn_yield(&value);
+  rc = crtn_yield(&value);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   value = 2;
-  crtn_yield(&value);
+  rc = crtn_yield(&value);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   crtn_exit(-2);
 
@@ -332,12 +344,14 @@ static int entry20(void *p)
 
 static int entry21(void *p)
 {
+  int rc;
   int value;
 
   (void)p;
 
   value = 1;
-  crtn_yield(&value);
+  rc = crtn_yield(&value);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   return 0;
 }
@@ -419,15 +433,18 @@ END_TEST
 
 static int entry30(void *p)
 {
+  int rc;
   int value;
 
   (void)p;
 
   value = 1;
-  crtn_yield(&value);
+  rc = crtn_yield(&value);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   value = 2;
-  crtn_yield(&value);
+  rc = crtn_yield(&value);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   crtn_exit(-4);
 
@@ -451,17 +468,20 @@ static int entry31(void *p)
 
 static int entry32(void *p)
 {
+  int rc;
   (void)p;
 
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   return 20;
 }
 
 
-static int entry33(void *p)
+static int entry_foo6(void *p)
 {
   int cid = *((int *)p);
   int rc;
@@ -474,14 +494,14 @@ static int entry33(void *p)
   return 0;
 }
 
-static int entry35(void *p)
+static int entry_sub(void *p)
 {
   (void)p;
 
   return 28;
 }
 
-static int entry34(void *p)
+static int entry_foo5(void *p)
 {
   crtn_t cid;
   int status;
@@ -489,7 +509,7 @@ static int entry34(void *p)
 
   (void)p;
 
-  rc = crtn_spawn(&cid, "sub", entry35, 0, 0);
+  rc = crtn_spawn(&cid, "sub", entry_sub, 0, 0);
   ck_assert_int_eq(rc, 0);
 
   rc = crtn_join(cid, &status);
@@ -645,13 +665,15 @@ int *pvalue;
   ck_assert_int_eq(rc, 0);
 
   // Suspend foo5 on crtn_yield()
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   rc = crtn_spawn(&cid1, "foo6", entry31, &cid, 0);
   ck_assert_int_eq(rc, 0);
 
   // Suspend foo6 on crtn_join(): this wakes up foo5
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   // foo5 suspends on the second crtn_yield()
 
@@ -676,26 +698,64 @@ int *pvalue;
   ck_assert_int_eq(rc, 0);
 
   // Suspended in ready state
-  rc = crtn_spawn(&cid, "foo5", entry34, 0, attr);
+  rc = crtn_spawn(&cid, "foo5", entry_foo5, 0, attr);
   ck_assert_int_eq(rc, 0);
+
+  // foo5 ready
 
   rc = crtn_attr_delete(attr);
   ck_assert_int_eq(rc, 0);
 
-  rc = crtn_spawn(&cid1, "foo6", entry33, &cid, 0);
+  rc = crtn_spawn(&cid1, "foo6", entry_foo6, &cid, 0);
   ck_assert_int_eq(rc, 0);
 
-  // Trigger foo6
+  // foo6 runnable
+
   crtn_yield(0);
 
-  // foo6 suspends on crtn_wait(), foo5 is triggered
-  // foo5 spawns sub and call crtn_join() on it
-  // sub is triggered and finishes
-  // foo5 is triggered and finishes
-  // foo6 is triggered and finishes
-  // Main is triggered
+  // main runnable (foo6 --> main)
+  // foo6 running
+  // foo6 triggers foo5
+  // foo5 runnable (foo6 --> main --> foo5)
+  // foo6 waiting on foo5 (main --> foo5)
+  // main is running (main --> foo5)
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
-  // Cancel the foo6 coroutine which is finshed
+  // main runnable
+  // foo5 is running (foo5 --> main)
+  // sub is spawned (foo5 --> main --> sub)
+  // foo5 is joining sub (main --> sub)
+
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
+
+  // sub is running
+  // main is runnable (sub --> main)
+  // sub finishes
+  // foo5 is runnable
+  // main is running (main -->foo5)
+
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
+
+  // foo5 is running (it joins sub)
+  // main is runnable (foo5 --> main)
+  // foo5 finishes, foo6 is runnable (main --> foo6)
+  // main is running
+
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
+
+  // foo6 is running
+  // main is runnable (foo6 --> main)
+  // foo6 finnishes
+  // main is running
+
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_SELF);
+
+  // Cancel the foo6 coroutine which is finished
   rc = crtn_cancel(cid1);
   ck_assert_int_eq(rc, -1);
   ck_assert_int_eq(crtn_errno(), EINVAL);
@@ -717,7 +777,8 @@ int *pvalue;
   ck_assert_int_eq(rc, 0);
 
   // Trigger foo_38
-  crtn_yield(0);
+  rc = crtn_yield(0);
+  ck_assert_int_eq(rc, CRTN_SCHED_OTHER);
 
   // foo_39 cancels foo_38 which waits on it
   rc = crtn_join(cid, &status);
