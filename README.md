@@ -32,7 +32,7 @@ The service is an abstraction layer on top of the GLIBC:
 
 `crtn` is distributed under the GNU LGPL license.
 
-The current document concerns `crtn` version **0.2.1** version.
+The current document concerns `crtn` version **0.2.1**.
 
 
 ## <a name="2_Maintainers"></a>2 Maintainers
@@ -47,7 +47,7 @@ The source code is available on github. Use the following command to clone it:
 ```
 $ git clone https://github.com/Rachid-Koucha/crtn.git
 ```
-To get the source code of the 0.2.1:
+To get the source code of the 0.2.1 version:
 ```
 $ cd crtn
 crtn$ git checkout tags/v0.2.1
