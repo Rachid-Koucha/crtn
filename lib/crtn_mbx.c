@@ -31,19 +31,20 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "crtn.h"
 #include "crtn_list.h"
 #include "crtn_ccb.h"
 
-
-static struct
+static size_t crtn_mbx_max;
+static struct crtn_mbx_t
 {
   int         busy;
   size_t      nb_msgs;
   crtn_link_t msgs;
   crtn_link_t crtns;
-} crtn_mbx[CRTN_MBX_MAX];
+} *crtn_mbx;
 
 
 /*
@@ -56,16 +57,16 @@ static int crtn_next_free_mbxid;
 static crtn_mbx_t crtn_get_mbxid(void)
 {
   int i;
-  int count = CRTN_MBX_MAX;
+  int count = crtn_mbx_max;
 
-  for (i = crtn_next_free_mbxid; count; count --, i = (i + 1) % CRTN_MBX_MAX) {
+  for (i = crtn_next_free_mbxid; count; count --, i = (i + 1) % crtn_mbx_max) {
     if (!(crtn_mbx[i].busy)) {
       // Mark the context busy
       crtn_mbx[i].busy = 1;
       CRTN_LIST_INIT(&(crtn_mbx[i].msgs));
       CRTN_LIST_INIT(&(crtn_mbx[i].crtns));
       crtn_mbx[i].nb_msgs = 0;
-      crtn_next_free_mbxid = (i + 1) % CRTN_MBX_MAX;
+      crtn_next_free_mbxid = (i + 1) % crtn_mbx_max;
       crtn_mbx_nb ++;
       return i;
     }
@@ -110,7 +111,7 @@ int crtn_mbx_new(crtn_mbx_t *mbx)
 
 int crtn_mbx_delete(crtn_mbx_t mbx)
 {
-  if (mbx < 0 || mbx >= CRTN_MBX_MAX) {
+  if (mbx < 0 || (size_t)mbx >= crtn_mbx_max) {
     crtn_set_errno(EINVAL);
     return -1;
   }
@@ -128,7 +129,7 @@ int crtn_mbx_post(
 {
   crtn_link_t *link;
 
-  if (mbx < 0 || mbx >= CRTN_MBX_MAX) {
+  if (mbx < 0 || (size_t)mbx >= crtn_mbx_max) {
     crtn_set_errno(EINVAL);
     return -1;
   }
@@ -165,7 +166,7 @@ int crtn_mbx_get(
 {
   crtn_link_t *link;
 
-  if (mbx < 0 || mbx >= CRTN_MBX_MAX) {
+  if (mbx < 0 || (size_t)mbx >= crtn_mbx_max) {
     crtn_set_errno(EINVAL);
     return -1;
   }
@@ -205,7 +206,7 @@ int crtn_mbx_tryget(
 {
   crtn_link_t *link;
 
-  if (mbx < 0 || mbx >= CRTN_MBX_MAX) {
+  if (mbx < 0 || (size_t)mbx >= crtn_mbx_max) {
     crtn_set_errno(EINVAL);
     return -1;
   }
@@ -301,3 +302,19 @@ void *crtn_mbx_format(
 
 } // crtn_mbx_format
 
+
+void crtn_lib_mbx_init(void)
+{
+  crtn_get_size_env("CRTN_MBX_MAX", &crtn_mbx_max, CRTN_MBX_MAX);
+  crtn_mbx = (struct crtn_mbx_t *)malloc(crtn_mbx_max * sizeof(struct crtn_mbx_t));
+  if (!crtn_mbx) {
+    fprintf(stderr, "malloc(%zu): %m (%d)\n", crtn_mbx_max * sizeof(crtn_mbx_t), errno);
+    return;
+  }
+} // crtn_lib_mbx_init
+
+
+void crtn_lib_mbx_exit(void)
+{
+  free(crtn_mbx);
+} // crtn_lib_mbx_exit

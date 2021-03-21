@@ -13,6 +13,8 @@ if (CHECK_FOUND)
   add_executable(check_all check_all.c
                            check_crtn_errcodes.c
                            check_crtn_api.c
+                           check_crtn_prog.c
+                           check_util.c
                            )
 
   target_link_libraries(check_all ${CHECK_LIBRARIES} crtn pthread)

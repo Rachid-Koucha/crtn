@@ -51,7 +51,7 @@ static crtn_ccb_attr_t crtn_default_attr = {
 
   CRTN_TYPE_STANDALONE | CRTN_TYPE_STACKFUL,
 
-  CRTN_DEFAULT_STACK_SIZE
+  0
 
 };
 
@@ -64,7 +64,8 @@ static crtn_link_t crtn_runnable_list;
 /*
   Table of CCB
 */
-static crtn_ccb_t *crtn_tab[CRTN_MAX];
+static size_t crtn_max;
+static crtn_ccb_t **crtn_tab;
 
 /*
   Number of active CCB
@@ -83,11 +84,15 @@ crtn_ccb_t *crtn_current;
 static crtn_ccb_t crtn_ccb_main;
 
 
-#define CRTN_EXIST(id) (((id) >= 0)       && \
-                        ((id) < CRTN_MAX) && \
+#define CRTN_EXIST(id) (((id) >= 0)       &&         \
+                        ((size_t)(id) < crtn_max) && \
                         crtn_tab[(id)])
 
 
+/*
+  Default stack size for the stackless/stackful coroutines
+*/
+static size_t crtn_stack_size;
 
 /*
   Stack for the stackless coroutines
@@ -109,13 +114,13 @@ int crtn_errno(void)
 static crtn_t crtn_get_id(crtn_ccb_t *ccb)
 {
   int i;
-  int count = CRTN_MAX;
+  int count = crtn_max;
 
-  for (i = crtn_next_free_id; count; count --, i = (i + 1) % CRTN_MAX) {
+  for (i = crtn_next_free_id; count; count --, i = (i + 1) % crtn_max) {
     if (!(crtn_tab[i])) {
       // Mark the context busy
       crtn_tab[i] = ccb;
-      crtn_next_free_id = (i + 1) % CRTN_MAX;
+      crtn_next_free_id = (i + 1) % crtn_max;
       crtn_nb ++;
       return i;
     }
@@ -442,7 +447,7 @@ int crtn_spawn(
 
   *cid = -1;
 
-  if (crtn_nb >= CRTN_MAX) {
+  if ((size_t)crtn_nb >= crtn_max) {
     crtn_set_errno(EAGAIN);
     return -1;
   }
@@ -481,7 +486,7 @@ int crtn_spawn(
 
     // If the stackless stack is not yet allocated, allocate it
     if (!crtn_stackless) {
-      crtn_stackless = (char *)malloc(CRTN_DEFAULT_STACK_SIZE);
+      crtn_stackless = (char *)malloc(crtn_stack_size);
       if (!crtn_stackless) {
         crtn_set_errno(errno);
         free(ccb);
@@ -490,7 +495,7 @@ int crtn_spawn(
     }
 
     stack = crtn_stackless;
-    stack_sz = CRTN_DEFAULT_STACK_SIZE;
+    stack_sz = crtn_stack_size;
 
   } else {
 
@@ -599,9 +604,7 @@ crtn_ccb_attr_t *iattr;
     iattr->type |= CRTN_TYPE_STACKLESS;
     iattr->stack_size = 0;
   } else {
-    if (!(iattr->stack_size)) {
-      iattr->stack_size = CRTN_DEFAULT_STACK_SIZE;
-    }
+    assert(iattr->stack_size);
   }
 
   if (type & CRTN_TYPE_STEPPER) {
@@ -620,7 +623,7 @@ int crtn_set_attr_stack_size(
 crtn_ccb_attr_t *iattr;
 
   if (!attr ||
-      (stack_size < CRTN_DEFAULT_STACK_SIZE)) {
+      (stack_size < crtn_stack_size)) {
     crtn_set_errno(EINVAL);
     return -1;
   }
@@ -867,14 +870,61 @@ crtn_ccb_t *ccb, *ccb1;
 } // crtn_cancel
 
 
+
+void crtn_get_size_env(
+                       const char *name,
+                       size_t *value,
+                       size_t default_value
+                      )
+{
+  char *env;
+
+  env = getenv(name);
+  if (env) {
+    errno = 0;
+    *value = (size_t)strtol(env, NULL, 10);
+    if (0 != errno) {
+      fprintf(stderr, "Bad value for '%s', error '%m' (%d)\n", name, errno);
+      *value = default_value;
+    }
+  } else {
+    *value = default_value;
+  }
+} // crtn_get_env
+
+
+
 void __attribute__ ((constructor)) crtn_lib_init(void);
 
 void crtn_lib_init(void)
 {
   crtn_ccb_t *ccb;
 
+  // Get the environment variables
+  crtn_get_size_env("CRTN_MAX", &crtn_max, CRTN_MAX);
+  crtn_get_size_env("CRTN_STACK_SIZE", &crtn_stack_size, CRTN_DEFAULT_STACK_SIZE);
+  crtn_default_attr.stack_size = crtn_stack_size;
+
+  // Allocate the table of coroutines
+  crtn_tab = (crtn_ccb_t **)malloc(crtn_max * sizeof(crtn_ccb_t *));
+  if (!crtn_tab) {
+    fprintf(stderr, "malloc(%zu): %m (%d)\n", crtn_max * sizeof(crtn_ccb_t *), errno);
+    return;
+  }
+
   // Initialize the list
   CRTN_LIST_INIT(&crtn_runnable_list);
+
+  // Initialize the optional services
+#ifdef HAVE_CRTN_MBX
+  extern void crtn_lib_mbx_init(void);
+  crtn_lib_mbx_init();
+#endif // HAVE_CRTN_MBX
+
+#ifdef HAVE_CRTN_SEM
+  extern void crtn_lib_sem_init(void);
+  crtn_lib_sem_init();
+#endif // HAVE_CRTN_SEM
 
   // Make the CCB of the main thread, no entry point
   ccb = crtn_current = &crtn_ccb_main;
@@ -899,10 +949,23 @@ void crtn_lib_exit(void)
 
   // Free the CCBs
 
+#ifdef HAVE_CRTN_MBX
+  extern void crtn_lib_mbx_exit(void);
+  crtn_lib_mbx_exit();
+#endif // HAVE_CRTN_MBX
+
+#ifdef HAVE_CRTN_SEM
+  extern void crtn_lib_sem_exit(void);
+  crtn_lib_sem_exit();
+#endif // HAVE_CRTN_SEM
+
   // Free the stack of the stackless coroutines
   if (crtn_stackless) {
     free(crtn_stackless);
     crtn_stackless = 0;
   }
+
+  // Free the table of coroutines
+  free(crtn_tab);
 
 } // crtn_lib_exit

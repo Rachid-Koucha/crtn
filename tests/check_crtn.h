@@ -36,6 +36,8 @@ extern TCase *crtn_errcodes_tests(void);
 
 extern TCase *crtn_api_tests(void);
 
+extern TCase *crtn_prog_tests(void);
+
 
 
 #endif // CHECK_CRTN_H

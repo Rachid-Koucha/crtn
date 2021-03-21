@@ -36,9 +36,26 @@
 #include <libgen.h>
 #include <stdlib.h>
 #include <check.h>
+#include <sys/wait.h>
 
 
+// ----------------------------------------------------------------------------
+// Name   : ck_assert_signaled
+// Usage  : checks the termination status is a signal reception
+// Return : None
+// ----------------------------------------------------------------------------
+#define ck_assert_signaled(status, sig) \
+                   do { ck_assert_int_ne(WIFSIGNALED(status), 0); \
+                        ck_assert_int_eq(WTERMSIG(status), (sig)); } while(0)
 
+// ----------------------------------------------------------------------------
+// Name   : ck_assert_exited
+// Usage  : checks the termination status is an exit code
+// Return : None
+// ----------------------------------------------------------------------------
+#define ck_assert_exited(status, code) \
+                 do { ck_assert_int_ne(WIFEXITED(status), 0); \
+                      ck_assert_int_eq(WEXITSTATUS(status), (code)); } while(0)
 
 // ----------------------------------------------------------------------------
 // Name   : ck_assert_errno_eq
@@ -78,6 +95,11 @@
                    getpid(), basename(__FILE__), __FUNCTION__, __LINE__, #e, ## __VA_ARGS__); \
        abort();           \
     } } while(0);
+
+
+extern int ck_exec_prog(
+                        char *av[]
+                       );
 
 
 #endif // CHECK_ALL_H
