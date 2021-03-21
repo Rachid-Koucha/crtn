@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <limits.h>
+#include <stdlib.h>
 
 #include "crtn.h"
 
@@ -42,6 +43,21 @@ static void hdl_sigint(int sig)
 
   printf("Signal %d...\n", sig);
   signaled = 1;
+
+} // hdl_sigint
+
+
+/*
+  For test purposes to make the
+  program flush its GCOV data
+*/
+static void hdl_sigsegv(int sig)
+{
+
+  printf("Signal %d...\n", sig);
+  signaled = 1;
+
+  exit(7);
 
 } // hdl_sigint
 
@@ -88,6 +104,7 @@ int main(void)
   unsigned int i;
 
   signal(SIGINT, hdl_sigint);
+  signal(SIGSEGV, hdl_sigsegv);
 
   attr = crtn_attr_new();
   if (!attr) {

@@ -128,5 +128,10 @@ extern void crtn_make_waiting(
                            crtn_link_t *link
                           );
 
+extern void crtn_get_size_env(
+                       const char *name,
+                       size_t *value,
+                       size_t default_value
+                       );
 
 #endif // CRTN_CCB_H

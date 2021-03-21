@@ -13,7 +13,7 @@ cmake_policy(SET CMP0048 NEW)
 #           PROJECT_DESCRIPTION, crtn_DESCRIPTION
 #           PROJECT_HOMEPAGE_URL, crtn_HOMEPAGE_URL
 PROJECT(crtn
-        VERSION 0.2.0
+        VERSION 0.2.1
         DESCRIPTION "CoRouTiNe API for C language"
         HOMEPAGE_URL "https://github.com/Rachid-Koucha/crtn"
         LANGUAGES C)
@@ -48,7 +48,7 @@ SET(CRTN_VERSION "${crtn_VERSION_MAJOR}.${crtn_VERSION_MINOR}.${crtn_VERSION_PAT
 #   DOCDIR           - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
 INCLUDE(GNUInstallDirs)
 
-MESSAGE(STATUS "Building CRTN version ${CRTN_VERSION}")
+MESSAGE(STATUS "Configuring CRTN version ${CRTN_VERSION}")
 
 # Size of the coroutine name
 SET(CFG_CRTN_NAME_SZ 24)

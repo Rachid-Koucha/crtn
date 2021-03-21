@@ -1,4 +1,4 @@
-.TH CRTN 7  "FEBRUARY 2021" "API v@CRTN_VERSION@" "API v@CRTN_VERSION@"
+.TH CRTN 7  "MARCH 2021" "API v@CRTN_VERSION@" "API v@CRTN_VERSION@"
 .SH NAME
 crtn \- API of CoRouTiNe service
 
@@ -69,6 +69,22 @@ Inter-coroutine communication/synchronization are provided: the mailboxes
 and semaphores
 .BR "(" crtn_sem "(3))."
 Those services are optional. They are set at package configuration time.
+
+.SH ENVIRONMENT
+
+Several environment variables are interpreted at library's initialization time:
+
+.IP CRTN_MAX
+Maximum number of coroutines (@CFG_CRTN_MAX@ by default).
+
+.IP CRTN_MBX_MAX
+Maximum number of semaphores (@CFG_CRTN_MBX_MAX@ by default).
+
+.IP CRTN_SEM_MAX
+Maximum number of semaphores (@CFG_CRTN_SEM_MAX@ by default).
+
+.IP CRTN_STACK_SIZE
+Size in bytes of the stack of stackless/stackful coroutines (@CFG_CRTN_STACK_SIZE@ by default).
 
 .SH AUTHOR
 Rachid Koucha

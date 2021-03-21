@@ -73,7 +73,9 @@ doc/crtn_state_diagram.png
 ./tests/wc5.c
 ./tests/mbx.c
 ./tests/check_all.c
+./tests/check_util.c
 ./tests/check_all.h
 ./tests/check_crtn.h
 ./tests/check_crtn_errcodes.c
 ./tests/check_crtn_api.c
+./tests/check_crtn_prog.c

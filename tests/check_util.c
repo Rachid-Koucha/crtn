@@ -23,41 +23,38 @@
 //
 // Evolutions  :
 //
-//     02-Mar-2021  R. Koucha    - Creation
+//     21-Mar-2021  R. Koucha    - Creation
 //
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-#include "../config.h"
-
-#include <errno.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 
-#include "check_all.h"
-#include "check_crtn.h"
-
-
-int main(void)
+int ck_exec_prog(
+                 char *av[]
+                )
 {
-int      number_failed = 0;
-Suite   *s1;
-SRunner *sr;
+  int pid;
 
-  // Create the suites
-  s1 = suite_create("CRTN tests");
+  pid = fork();
+  switch(pid) {
 
-  // Add the tests cases in the suites
-  suite_add_tcase(s1, crtn_errcodes_tests());
-  suite_add_tcase(s1, crtn_api_tests());
-  suite_add_tcase(s1, crtn_prog_tests());
+    case 0: {
+      execv(av[0], av);
+      _exit(1);
+    }
+    break;
 
-  sr = srunner_create(s1);
+    case -1: {
+      return -1;
+    }
+    break;
 
-  srunner_run_all(sr, CK_ENV);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
+    default: {
+      return pid;
+    }
 
-  return (0 == number_failed) ? EXIT_SUCCESS : EXIT_FAILURE;
-} // main
+  }
+
+} // ck_exec_prog
+

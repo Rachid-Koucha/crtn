@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "crtn.h"
 #include "crtn_list.h"
@@ -39,13 +40,14 @@
 
 
 
+static size_t crtn_sem_max;
 
-static struct
+static struct crtn_sem_t
 {
   int          busy;
   unsigned int counter;
   crtn_link_t  crtns;
-} crtn_sem[CRTN_SEM_MAX];
+} *crtn_sem;
 
 
 /*
@@ -58,15 +60,15 @@ static int crtn_next_free_semid;
 static crtn_sem_t crtn_get_semid(void)
 {
   int i;
-  int count = CRTN_SEM_MAX;
+  int count = crtn_sem_max;
 
-  for (i = crtn_next_free_semid; count; count --, i = (i + 1) % CRTN_SEM_MAX) {
+  for (i = crtn_next_free_semid; count; count --, i = (i + 1) % crtn_sem_max) {
     if (!(crtn_sem[i].busy)) {
       // Mark the context busy
       crtn_sem[i].busy = 1;
       CRTN_LIST_INIT(&(crtn_sem[i].crtns));
       crtn_sem[i].counter = 0;
-      crtn_next_free_semid = (i + 1) % CRTN_SEM_MAX;
+      crtn_next_free_semid = (i + 1) % crtn_sem_max;
       crtn_sem_nb ++;
       return i;
     }
@@ -115,7 +117,7 @@ int crtn_sem_new(
 
 int crtn_sem_delete(crtn_sem_t sem)
 {
-  if (sem < 0 || sem >= CRTN_SEM_MAX) {
+  if (sem < 0 || (size_t)sem >= crtn_sem_max) {
     crtn_set_errno(EINVAL);
     return -1;
   }
@@ -132,7 +134,7 @@ int crtn_sem_v(
 {
   crtn_link_t *link;
 
-  if (sem < 0 || sem >= CRTN_SEM_MAX) {
+  if (sem < 0 || (size_t)sem >= crtn_sem_max) {
     crtn_set_errno(EINVAL);
     return -1;
   }
@@ -159,7 +161,7 @@ int crtn_sem_p(
                crtn_sem_t sem
               )
 {
-  if (sem < 0 || sem >= CRTN_SEM_MAX) {
+  if (sem < 0 || (size_t)sem >= crtn_sem_max) {
     crtn_set_errno(EINVAL);
     return -1;
   }
@@ -175,3 +177,18 @@ int crtn_sem_p(
 } // crtn_sem_p
 
 
+void crtn_lib_sem_init(void)
+{
+  crtn_get_size_env("CRTN_SEM_MAX", &crtn_sem_max, CRTN_SEM_MAX);
+  crtn_sem = (struct crtn_sem_t *)malloc(crtn_sem_max * sizeof(struct crtn_sem_t));
+  if (!crtn_sem) {
+    fprintf(stderr, "malloc(%zu): %m (%d)\n", crtn_sem_max * sizeof(crtn_sem_t), errno);
+    return;
+  }
+} // crtn_lib_sem_init
+
+
+void crtn_lib_sem_exit(void)
+{
+  free(crtn_sem);
+} // crtn_lib_sem_exit

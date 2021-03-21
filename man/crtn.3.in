@@ -172,7 +172,9 @@ function terminates the coroutine identified by
 .PP
 The
 .BR crtn_errno ()
-function returns the error code (value from <errno.h>) of the latest failed service called
+function returns the error code (value from
+.IR <errno.h> )
+of the latest failed service called
 by the calling coroutine.
 
 .SH RETURN VALUE
@@ -404,3 +406,6 @@ Rachid Koucha
 
 .SH "SEE ALSO"
 
+.BR crtn (7),
+.BR crtn_mbx (3),
+.BR crtn_sem (3).
