@@ -20,13 +20,16 @@
 [8 Documentation](#8_Documentation)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.1 Online manuals](#8_1_Online_man)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.2 Overview of the API](#8_2_API_overw)  
-&nbsp;&nbsp;&nbsp;&nbsp;[8.3 Example program](#8_3_Ex_prog)
+&nbsp;&nbsp;&nbsp;&nbsp;[8.3 Example program](#8_3_Ex_prog)  
+&nbsp;&nbsp;&nbsp;&nbsp;[8.4 Configuration environment variables](#8_4_Cfg_env_var)  
 
 ## <a name="1_Introduction"></a>1 Introduction
 
-CoRouTiNe (`crtn`) is a shared library providing an API which proposes coroutines in C language programs. This is a set of services to manage concurrent execution flows. A coroutine can be suspended or resumed under the control of the user. The underlying operating system have no idea of their existence.
+CoRouTiNe (`crtn`) is an API providing coroutines in C language programs.
+They are concurrent execution flows that can be suspended or resumed under the control of the user.
+The underlying operating system have no idea of their existence.
 
-The service is an abstraction layer on top of the GLIBC:
+The service is an abstraction layer implemented as a shared library on top of GLIBC:
 
 <p align="center"><img src="doc/crtn_layers.png"></p>
 
@@ -67,6 +70,17 @@ $ cmake .
 -- Configuring CRTN version 0.2.1
 The user id is 1000
 [...]
+```
+
+Some optional services can be set by cmake variables:
+```
+$ cmake -LH
+[...]
+// Mailbox service
+HAVE_CRTN_MBX:BOOL=OFF
+
+// Semaphore service
+HAVE_CRTN_SEM:BOOL=OFF
 ```
 
 To configure the package with the optional mailbox and semaphore services:
@@ -353,7 +367,7 @@ $ sudo dpkg -r crtn
 
 Once `crtn` is installed, it is possible to access the corresponding online manuals with:
 ```
-$ man 7 crtn       # Overview of CRTN
+$ man 7 crtn       # Overview of crtn and configuration environment variables
 
 $ man 3 crtn       # Manual of crtn API
 
@@ -363,6 +377,8 @@ $ man 3 crtn_sem   # Manual of crtn semaphore service
 ```
 The latters provide some small example programs in their _EXAMPLES_ section.
 ### <a name="8_2_API_overw"></a>8.2 Overview of the API
+
+The API is similar to the pthread's one.
 
 A coroutine is created with `crtn_spawn()`.  The latter returns a unique coroutine identifier (cid).
 
@@ -540,3 +556,12 @@ seq[13]=233
 ^CSignal 2...
 ```
 Many other example programs are available in the _tests_ sub-directory of the source code tree.
+
+### <a name="8_4_Cfg_env_var"></a>8.4 Configuration environment variables
+
+As described in `man 7 crtn`, several environment variables are interpreted at library's initialization time:
+- **CRTN_MAX**: Maximum number of coroutines (20 by default);
+- **CRTN_MBX_MAX**: Maximum number of semaphores (64 by default);
+- **CRTN_SEM_MAX**: Maximum number of semaphores (64 by default);
+- **CRTN_STACK_SIZE**: Size in bytes of the stack of stackless/stackful coroutines (16384 by default).
+
