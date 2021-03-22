@@ -141,6 +141,10 @@ static int counter(void *param)
 
     c = read_buffer();
 
+    if (c == EOF) {
+      break;
+    }
+
     switch(state) {
 
       case SPACE: {

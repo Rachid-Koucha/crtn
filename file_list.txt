@@ -27,8 +27,11 @@
 ./lib/crtn_mbx.c
 ./lib/crtn_sem.c
 
-doc/crtn_layers.png
-doc/crtn_state_diagram.png
+./doc/crtn_coverage.png
+./doc/crtn_layers.png
+./doc/crtn_source_tree.png
+./doc/crtn_state_diagram.png
+./doc/crtn_wc.png
 
 ./man/CMakeLists.txt
 ./man/crtn.3.in
@@ -71,6 +74,7 @@ doc/crtn_state_diagram.png
 ./tests/wc3.c
 ./tests/wc4.c
 ./tests/wc5.c
+./tests/wc6.c
 ./tests/mbx.c
 ./tests/check_all.c
 ./tests/check_util.c

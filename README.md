@@ -21,12 +21,13 @@
 [8 Usage](#8_Usage)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.1 Online manuals](#8_1_Online_man)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.2 Overview of the API](#8_2_API_overw)  
-&nbsp;&nbsp;&nbsp;&nbsp;[8.3 Example program](#8_3_Ex_prog)  
-&nbsp;&nbsp;&nbsp;&nbsp;[8.4 Configuration environment variables](#8_4_Cfg_env_var)  
+&nbsp;&nbsp;&nbsp;&nbsp;[8.3 Example program: generator](#8_3_Ex_prog_gen)  
+&nbsp;&nbsp;&nbsp;&nbsp;[8.4 Example program: Producer/Consumer](#8_4_Ex_prog_prodcons)  
+&nbsp;&nbsp;&nbsp;&nbsp;[8.5 Configuration environment variables](#8_5_Cfg_env_var)  
 
 ## <a name="1_Introduction"></a>1 Introduction
 
-CoRouTiNe (`crtn`) is an API providing coroutines in C language programs.
+CoRouTiNe (`crtn`) is an API providing [coroutines](https://en.wikipedia.org/wiki/Coroutine) in C language programs.
 They are concurrent execution flows that can be suspended or resumed under the control of the user.
 The underlying operating system have no idea of their existence.
 
@@ -446,7 +447,9 @@ Additional inter-coroutine communication and synchronization are optionally prov
 - The mailboxes (`crtn_mbx_new()`, `crtn_mbx_post()`, `crtn_mbx_get()`...). They are provided with `-o mbx`;
 - The semaphores (`crtn_sem_new()`, `crtn_sem_p()`, `crtn_sem_v()`...). They are provided with `-o sem`.
 
-### <a name="8_3_Ex_prog"></a>8.3 Example program
+### <a name="8_3_Ex_prog_gen"></a>8.3 Example program: generator
+
+Coroutines are well-suited for implementing generators.
 
 In the following example, the main coroutine creates a secondary coroutines with the `stepper` attribute and resumes it every seconds. The secondary coroutine generates the following term of the [fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number) each time it is resumed by the main coroutine. The term is passed through `crtn_wait()`. 
 
@@ -603,7 +606,328 @@ seq[13]=233
 ```
 Many other example programs are available in the _tests_ sub-directory of the source code tree.
 
-### <a name="8_4_Cfg_env_var"></a>8.4 Configuration environment variables
+
+### <a name="8_4_Ex_prog_prodcons"></a>8.4 Example program: Producer/Consumer
+
+Coroutines are well-suited for implementing cooperating tasks.
+
+The following is an example of producer/consumer program reimplementing the shell's `wc` program to count the
+lines, words and characters from the standard input. The behaviour of the program is depicted with the following
+diagram:
+
+<p align="center"><img src="doc/crtn_wc.png"></p>
+
+The main coroutine (the producer) reads **stdin** in non blocking mode (`nb_read()` function) and fills a buffer
+with the `fill_buffer()` function. The function relinquishes the CPU when data are written in the buffer. This
+resumes the other coroutines.
+
+Each state of the above diagram are implemented with coroutines (the consumers) which merely read the buffer (with `read_buffer()`
+function) and relinquish the CPU as soon as the read character is not accepted in the corresponding state. The
+latter is put back in the buffer (with `unread_buffer()` function).
+
+The coroutines finish when they encounter **EOF**.
+
+The buffer looks like a pipe between the producer and the consumers. The producer increments a write pointer and
+the consumers increment a read pointer. The buffer is empty when both pointers are equal.
+
+Concerning the scheduling, all the coroutines are **standalone**. They don't resume explicitly any other
+coroutine. They cooperate implicitly by calling `crtn_yield()` whenever characters are added in the buffer
+(for the producer) and the read character is not accepted or the read pointer reaches the write pointer
+(for the consumers). For the latters, this works because any character is accepted in only one state. So, if
+a consumer coroutine is resumed and encounters a unaccepted characters, it suspends itself immediately to
+resume any other coroutine. When resumed, the producer suspends itself if the read pointer is not equal to the
+write one.
+
+```c
+#include <errno.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <assert.h>
+#include <sys/select.h>
+#include <unistd.h>
+
+#include "crtn.h"
+
+static int w_offset, r_offset;
+
+#define BUFFER_SIZE 128
+static char buffer[BUFFER_SIZE];
+
+struct counter_t
+{
+  size_t nb_chars;
+  size_t nb_spaces;
+  size_t nb_words;
+  size_t nb_lines;
+};
+
+struct counter_t cnts;
+
+
+
+//----------------------------------------------------------------------------
+// Name        : nb_read
+// Description : Non blocking read
+// Return      : Number of read bytes if OK
+//               -1, if error
+//----------------------------------------------------------------------------
+int nb_read(int fd, char *buf, size_t bufsz)
+{
+int            rc;
+fd_set         fdset;
+int            nfds = fd + 1;
+struct timeval to;
+
+  to.tv_sec  = 0;
+  to.tv_usec = 0;
+
+  while(1) {
+    FD_ZERO(&fdset);
+    FD_SET(fd, &fdset);
+
+    rc = select(nfds, &fdset, NULL, NULL, &to);
+    switch (rc) {
+
+      // Error
+      case -1 : {
+        // Interrupted system call ?
+        if (EINTR == errno) {
+          to.tv_sec  = 0;
+          to.tv_usec = 0;
+        } else {
+          return -1;
+        }
+      }
+      break;
+
+      // Timeout
+      case 0: {
+        // No data ==> Retry with a timeout 5 ms
+        to.tv_usec = 5000;
+      }
+      break;
+
+      // Incoming data
+      default : {
+        rc = read(fd, buf, bufsz);
+        if (rc < 0) {
+          return -1;
+        }
+
+        if (0 == rc) {
+          buf[0] = EOF;
+          return 1;
+        }
+
+        return rc;
+      }
+      break;
+    } // End switch
+  } // End while
+} // nb_read
+
+static int read_buffer(void)
+{
+  if (r_offset == w_offset) {
+    crtn_yield(0);
+  }
+
+  cnts.nb_chars ++;
+  return buffer[r_offset ++];
+} // read_buffer
+
+#define unread_buffer(c) do {           \
+                  assert(r_offset > 0); \
+                  -- r_offset;          \
+                  cnts.nb_chars --;     \
+                } while(0)
+
+static void fill_buffer(void)
+{
+  do {
+    // Upon EOF, nb_read() returns 1 with EOF in buffer[0]
+    w_offset = nb_read(0, buffer, BUFFER_SIZE);
+
+    // If no error, there is at least an EOF in the buffer
+    if (w_offset > 0) {
+      r_offset = 0;
+      while (r_offset != w_offset) {
+
+        crtn_yield(0);
+
+        if (buffer[w_offset-1] == EOF) {
+          return;
+        }
+      }
+    }
+  } while (1);
+} // fill_buffer
+
+
+static int get_spaces(void *p)
+{
+  int c;
+
+  (void)p;
+
+  do {
+
+    c = read_buffer();
+    while(isspace(c) && (c != '\n') && (c != EOF)) {
+      cnts.nb_spaces ++;
+      c = read_buffer();
+    }
+    unread_buffer(c);
+
+    if (c == EOF) {
+      break;
+    }
+
+    crtn_yield(0);
+
+  } while(1);
+
+  return 0;
+
+} // get_spaces
+
+static int get_word(void *p)
+{
+  int c;
+  size_t count;
+
+  (void)p;
+
+  do {
+
+    count = cnts.nb_chars;
+    c = read_buffer();
+    while(!isspace(c) && (c != EOF)) {
+      c = read_buffer();
+    }
+    unread_buffer(c);
+    if (cnts.nb_chars > count) {
+      cnts.nb_words ++;
+    }
+
+    if (c == EOF) {
+      break;
+    }
+
+    crtn_yield(0);
+
+  } while(1);
+
+  return 0;
+
+} // get_word
+
+
+static int get_lines(void *p)
+{
+  int c;
+
+  (void)p;
+
+  do {
+
+    c = read_buffer();
+    while((c == '\n') && (c != EOF)) {
+      cnts.nb_lines ++;
+      c = read_buffer();
+    }
+    unread_buffer(c);
+
+    if (c == EOF) {
+      break;
+    }
+
+    crtn_yield(0);
+
+  } while(1);
+
+  return 0;
+
+} // get_lines
+
+
+int main(void)
+{
+  crtn_t cid_word, cid_spaces, cid_lines;
+  int rc;
+  int status;
+
+  rc = crtn_spawn(&cid_word, "word", get_word, 0, 0);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  rc = crtn_spawn(&cid_lines, "lines", get_lines, 0, 0);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  rc = crtn_spawn(&cid_spaces, "space", get_spaces, 0, 0);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  fill_buffer();
+
+  rc = crtn_join(cid_word, &status);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  rc = crtn_join(cid_spaces, &status);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  rc = crtn_join(cid_lines, &status);
+  if (rc != 0) {
+    errno = crtn_errno();
+    fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
+    return 1;
+  }
+
+  printf("Lines: %zu / Words: %zu / Spaces: %zu / Characters: %zu\n"
+         ,
+         cnts.nb_lines, cnts.nb_words, cnts.nb_spaces, cnts.nb_chars
+        );
+
+  return status;
+
+} // main
+```
+Build:
+```
+$ gcc mywc.c -o mywc -lcrtn
+```
+Execution:
+```
+$ > foo
+$ cat foo | wc
+      0       0       0
+$ cat foo | ./mywc
+Lines: 0 / Words: 0 / Spaces: 0 / Characters: 0
+$ cat /etc/passwd | wc
+     50      91    3017
+$ cat /etc/passwd | ./mywc 
+Lines: 50 / Words: 91 / Spaces: 41 / Characters: 3017
+```
+
+### <a name="8_5_Cfg_env_var"></a>8.5 Configuration environment variables
 
 As described in `man 7 crtn`, several environment variables are interpreted at library's initialization time:
 - **CRTN_MAX**: Maximum number of coroutines (20 by default);

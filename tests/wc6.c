@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// File        : wc5.c
+// File        : wc6.c
 // Description : Line, word, char counter
 // License     :
 //
@@ -23,7 +23,7 @@
 //
 // Evolutions  :
 //
-//     25-Feb-2021 R. Koucha      - Creation
+//     22-Mar-2021 R. Koucha      - Creation
 //
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -61,10 +61,10 @@ struct counter_t cnts;
 //----------------------------------------------------------------------------
 int nb_read(int fd, char *buf, size_t bufsz)
 {
-int             rc;
-fd_set          fdset;
-int             nfds = fd + 1;
-struct timeval  to;
+int            rc;
+fd_set         fdset;
+int            nfds = fd + 1;
+struct timeval to;
 
   to.tv_sec  = 0;
   to.tv_usec = 0;
@@ -133,36 +133,32 @@ static int read_buffer(void)
 static void fill_buffer(void)
 {
   do {
-
     // Upon EOF, nb_read() returns 1 with EOF in buffer[0]
     w_offset = nb_read(0, buffer, BUFFER_SIZE);
 
     // If no error, there is at least an EOF in the buffer
     if (w_offset > 0) {
       r_offset = 0;
-      while (r_offset != w_offset && buffer[w_offset-1] != EOF) {
+      while (r_offset != w_offset) {
+
         crtn_yield(0);
+
+        if (buffer[w_offset-1] == EOF) {
+          return;
+        }
       }
     }
-
-  } while (w_offset > 0 && buffer[w_offset-1] != EOF);
-
+  } while (1);
 } // fill_buffer
 
 
 static int get_spaces(void *p)
 {
   int c;
-  crtn_sem_t sem = *((crtn_sem_t *)p);
-  int rc;
+
+  (void)p;
 
   do {
-
-    rc = crtn_sem_p(sem);
-    if (rc != 0) {
-      fprintf(stderr, "crtn_sem_p(): error %d\n", crtn_errno());
-      return -1;
-    }
 
     c = read_buffer();
     while(isspace(c) && (c != '\n') && (c != EOF)) {
@@ -170,12 +166,6 @@ static int get_spaces(void *p)
       c = read_buffer();
     }
     unread_buffer(c);
-
-    rc = crtn_sem_v(sem);
-    if (rc != 0) {
-      fprintf(stderr, "crtn_sem_v(): error %d\n", crtn_errno());
-      return -1;
-    }
 
     if (c == EOF) {
       break;
@@ -193,16 +183,10 @@ static int get_word(void *p)
 {
   int c;
   size_t count;
-  crtn_sem_t sem = *((crtn_sem_t *)p);
-  int rc;
+
+  (void)p;
 
   do {
-
-    rc = crtn_sem_p(sem);
-    if (rc != 0) {
-      fprintf(stderr, "crtn_sem_p(): error %d\n", crtn_errno());
-      return -1;
-    }
 
     count = cnts.nb_chars;
     c = read_buffer();
@@ -212,12 +196,6 @@ static int get_word(void *p)
     unread_buffer(c);
     if (cnts.nb_chars > count) {
       cnts.nb_words ++;
-    }
-
-    rc = crtn_sem_v(sem);
-    if (rc != 0) {
-      fprintf(stderr, "crtn_sem_v(): error %d\n", crtn_errno());
-      return -1;
     }
 
     if (c == EOF) {
@@ -235,17 +213,11 @@ static int get_word(void *p)
 
 static int get_lines(void *p)
 {
-  crtn_sem_t sem = *((crtn_sem_t *)p);
   int c;
-  int rc;
+
+  (void)p;
 
   do {
-
-    rc = crtn_sem_p(sem);
-    if (rc != 0) {
-      fprintf(stderr, "crtn_sem_p(): error %d\n", crtn_errno());
-      return -1;
-    }
 
     c = read_buffer();
     while((c == '\n') && (c != EOF)) {
@@ -253,12 +225,6 @@ static int get_lines(void *p)
       c = read_buffer();
     }
     unread_buffer(c);
-
-    rc = crtn_sem_v(sem);
-    if (rc != 0) {
-      fprintf(stderr, "crtn_sem_v(): error %d\n", crtn_errno());
-      return -1;
-    }
 
     if (c == EOF) {
       break;
@@ -278,29 +244,22 @@ int main(void)
   crtn_t cid_word, cid_spaces, cid_lines;
   int rc;
   int status;
-  crtn_sem_t sem;
 
-  rc = crtn_sem_new(&sem, 1);
-  if (rc != 0) {
-    fprintf(stderr, "Error %d\n", crtn_errno());
-    return 1;
-  }
-
-  rc = crtn_spawn(&cid_word, "word", get_word, &sem, 0);
+  rc = crtn_spawn(&cid_word, "word", get_word, 0, 0);
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
     return 1;
   }
 
-  rc = crtn_spawn(&cid_lines, "lines", get_lines, &sem, 0);
+  rc = crtn_spawn(&cid_lines, "lines", get_lines, 0, 0);
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
     return 1;
   }
 
-  rc = crtn_spawn(&cid_spaces, "space", get_spaces, &sem, 0);
+  rc = crtn_spawn(&cid_spaces, "space", get_spaces, 0, 0);
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_spawn(): error '%m' (%d)\n", errno);
@@ -327,12 +286,6 @@ int main(void)
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
-    return 1;
-  }
-
-  rc = crtn_sem_delete(sem);
-  if (rc != 0) {
-    fprintf(stderr, "Error %d\n", crtn_errno());
     return 1;
   }
 
