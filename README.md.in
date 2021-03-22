@@ -6,9 +6,10 @@
 [4 Administation with cmake ](#4_Adm_cmake)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.1 Configuration](#4_1_Cfg)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.2 Build](#4_2_Build)  
-&nbsp;&nbsp;&nbsp;&nbsp;[4.3 Tests](#4_3_Tests)  
-&nbsp;&nbsp;&nbsp;&nbsp;[4.4 Tests coverage measurement](#4_4_Tests_coverage)  
-&nbsp;&nbsp;&nbsp;&nbsp;[4.5 Packaging](#4_5_Packaging)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.3 Installation](#4_3_Installation)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.4 Tests](#4_4_Tests)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.5 Tests coverage measurement](#4_5_Tests_coverage)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.6 Packaging](#4_6_Packaging)  
 [5 Administration with crtn_install.sh](#5_Adm_script)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.1 crtn_install.sh script](#5_1_crtn_install_sh_scritpt)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.2 Build, installation, cleanup](#5_2_Build_installation_cleanup)  
@@ -106,7 +107,33 @@ To clean the built files:
 $ make clean
 ```
 
-### <a name="4_3_Tests"></a>4.3 Tests
+### <a name="4_3_Installation"></a>4.3 Installation
+
+To install the sofware:
+```
+$ sudo make install
+```
+By default, the library and the manuals are installed under _/usr/local_:
+```
+$ ls -l /usr/local/lib/libcrtn.so*
+lrwxrwxrwx 1 root root    12 mars   21 12:04 /usr/local/lib/libcrtn.so -> libcrtn.so.@PROJECT_VERSION_MAJOR@
+lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.@PROJECT_VERSION_MAJOR@ -> libcrtn.so.@VERSION@
+-r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.@VERSION@
+$ ls -l /usr/local/share/man/man3/crtn*
+-r--r--r-- 1 root root 2786 mars   21 12:04 /usr/local/share/man/man3/crtn.3.gz
+-r--r--r-- 1 root root   55 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_delete.3.gz
+-r--r--r-- 1 root root   52 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_new.3.gz
+-r--r--r-- 1 root root   50 mars   21 12:04 /usr/local/share/man/man3/crtn_cancel.3.gz
+[...]
+$ ls -l /usr/local/share/man/man7/crtn*
+-r--r--r-- 1 root root 1436 mars   21 12:04 /usr/local/share/man/man7/crtn.7.gz
+```
+To uninstall the software:
+```
+$ sudo make uninstall
+```
+
+### <a name="4_4_Tests"></a>4.4 Tests
 
 To launch the regression tests (`check` package must be available on the system):
 ```
@@ -115,7 +142,7 @@ Running suite(s): CRTN tests
 100%: Checks: 31, Failures: 0, Errors: 0
 ```
 
-### <a name="4_4_Tests_coverage"></a>4.4 Tests coverage measurement
+### <a name="4_5_Tests_coverage"></a>4.5 Tests coverage measurement
 
 To launch the tests coverage with the semaphore/mailbox optional services:
 ```
@@ -147,7 +174,7 @@ The resulting _./all_coverage/index.html_ file can be viewed in a browser to get
 <p align="center"><img src="doc/crtn_coverage.png"></p>
 
 
-### <a name="4_5_Packaging"></a>4.5 Packaging
+### <a name="4_6_Packaging"></a>4.6 Packaging
 
 To generate the DEB, RPM, TGZ and STGZ packages with the semaphore/mailbox optional services:
 
@@ -205,23 +232,38 @@ Note that some options require super user privileges. Use `sudo` for example.
 ### <a name="5_2_Build_installation_cleanup"></a>5.2 Build, installation, cleanup
 
 
-* To build the library:
+To build the library:
 
 `$ ./crtn_install.sh -B`
 
-* If mailbox and/or semaphores are required, add the corresponding option on the command line:
+If mailbox and/or semaphores are required, add the corresponding option on the command line:
 
 `$ ./crtn_install.sh -B -o mbx -o sem`
 
-* For a complete installation in the default _@CMAKE_INSTALL_PREFIX@_ subtree (super user rights required):
+For a complete installation in the default _@CMAKE_INSTALL_PREFIX@_ subtree (super user rights required):
 
 `$ sudo ./crtn_install.sh -I`
 
-* To uninstall the software (super user rights required):
+By default, the library and the manuals are installed under _/usr/local_:
+```
+$ ls -l /usr/local/lib/libcrtn.so*
+lrwxrwxrwx 1 root root    12 mars   21 12:04 /usr/local/lib/libcrtn.so -> libcrtn.so.@PROJECT_VERSION_MAJOR@
+lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.@PROJECT_VERSION_MAJOR@ -> libcrtn.so.@VERSION@
+-r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.@VERSION@
+$ ls -l /usr/local/share/man/man3/crtn*
+-r--r--r-- 1 root root 2786 mars   21 12:04 /usr/local/share/man/man3/crtn.3.gz
+-r--r--r-- 1 root root   55 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_delete.3.gz
+-r--r--r-- 1 root root   52 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_new.3.gz
+-r--r--r-- 1 root root   50 mars   21 12:04 /usr/local/share/man/man3/crtn_cancel.3.gz
+[...]
+$ ls -l /usr/local/share/man/man7/crtn*
+-r--r--r-- 1 root root 1436 mars   21 12:04 /usr/local/share/man/man7/crtn.7.gz
+```
+To uninstall the software (super user rights required):
 
 `$ sudo ./crtn_install.sh -U`
 
-* To cleanup every generated files to go back to original source tree:
+To cleanup every generated files to go back to original source tree:
 
 `$ ./crtn_install.sh -c`
 
