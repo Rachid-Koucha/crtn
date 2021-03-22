@@ -21,9 +21,10 @@
 [8 Usage](#8_Usage)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.1 Online manuals](#8_1_Online_man)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.2 Overview of the API](#8_2_API_overw)  
-&nbsp;&nbsp;&nbsp;&nbsp;[8.3 Example program: generator](#8_3_Ex_prog_gen)  
-&nbsp;&nbsp;&nbsp;&nbsp;[8.4 Example program: Producer/Consumer](#8_4_Ex_prog_prodcons)  
-&nbsp;&nbsp;&nbsp;&nbsp;[8.5 Configuration environment variables](#8_5_Cfg_env_var)  
+&nbsp;&nbsp;&nbsp;&nbsp;[8.3 Examples](#8_3_Examples)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[8.3.1 Generator](#8_3_1_Generator)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[8.3.2 Producer/Consumer](#8_3_2_Prodcons)  
+&nbsp;&nbsp;&nbsp;&nbsp;[8.4 Configuration environment variables](#8_4_Cfg_env_var)  
 
 ## <a name="1_Introduction"></a>1 Introduction
 
@@ -447,7 +448,9 @@ Additional inter-coroutine communication and synchronization are optionally prov
 - The mailboxes (`crtn_mbx_new()`, `crtn_mbx_post()`, `crtn_mbx_get()`...). They are provided with `-o mbx`;
 - The semaphores (`crtn_sem_new()`, `crtn_sem_p()`, `crtn_sem_v()`...). They are provided with `-o sem`.
 
-### <a name="8_3_Ex_prog_gen"></a>8.3 Example program: generator
+### <a name="8_3_Examples"></a>8.3 Examples
+
+#### <a name="8_3_1_Generator"></a>8.3.1 Generator
 
 Coroutines are well-suited for implementing generators.
 
@@ -606,8 +609,7 @@ seq[13]=233
 ```
 Many other example programs are available in the _tests_ sub-directory of the source code tree.
 
-
-### <a name="8_4_Ex_prog_prodcons"></a>8.4 Example program: Producer/Consumer
+#### <a name="8_3_2_Prodcons"></a>8.3.2 Producer/Consumer
 
 Coroutines are well-suited for implementing cooperating tasks in event-driven
 applications.
@@ -639,6 +641,7 @@ a consumer coroutine is resumed and encounters an unaccepted character, it suspe
 resume any other coroutine. When resumed, the producer suspends itself if the read pointer is not equal to the
 write one.
 
+No semaphore is needed as the coroutines run concurrently but not in parallel.
 ```c
 #include <errno.h>
 #include <stdio.h>
@@ -928,7 +931,7 @@ $ cat /etc/passwd | ./mywc
 Lines: 50 / Words: 91 / Spaces: 41 / Characters: 3017
 ```
 
-### <a name="8_5_Cfg_env_var"></a>8.5 Configuration environment variables
+### <a name="8_4_Cfg_env_var"></a>8.4 Configuration environment variables
 
 As described in `man 7 crtn`, several environment variables are interpreted at library's initialization time:
 - **CRTN_MAX**: Maximum number of coroutines (20 by default);
