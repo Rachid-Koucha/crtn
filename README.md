@@ -535,10 +535,14 @@ int main(void)
 
 } // main
 ```
-The execution displays:
+Build:
+```
+$ gcc fibonacci.c -o fibonacci -lcrtn
+```
+Execution:
 
 ```
-$ fibonacci
+$ ./fibonacci
 seq[0]=0
 seq[1]=1
 seq[2]=1
@@ -564,4 +568,3 @@ As described in `man 7 crtn`, several environment variables are interpreted at l
 - **CRTN_MBX_MAX**: Maximum number of semaphores (64 by default);
 - **CRTN_SEM_MAX**: Maximum number of semaphores (64 by default);
 - **CRTN_STACK_SIZE**: Size in bytes of the stack of stackless/stackful coroutines (16384 by default).
-
