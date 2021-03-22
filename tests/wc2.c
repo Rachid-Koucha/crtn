@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// File        : wc.c
+// File        : wc2.c
 // Description : Line, word, char counter
 // License     :
 //
@@ -164,6 +164,10 @@ static int counter(void *param)
   while(state != END) {
 
     c = read_buffer();
+
+    if (c == EOF) {
+      break;
+    }
 
     switch(state) {
 

@@ -71,6 +71,9 @@ if (${HAVE_CRTN_SEM} STREQUAL ON)
   TARGET_LINK_LIBRARIES(mywc5 crtn)
 endif()
 
+ADD_EXECUTABLE(mywc6 wc6.c)
+TARGET_LINK_LIBRARIES(mywc6 crtn)
+
 ADD_EXECUTABLE(fibonacci fibonacci.c)
 TARGET_LINK_LIBRARIES(fibonacci crtn)
 
