@@ -18,7 +18,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[5.5 Packaging](#5_5_Packaging)  
 [6 Notes about RPM package](#6_Notes_rpm)  
 [7 Notes about DEB package](#7_Notes_deb)  
-[8 Documentation](#8_Documentation)  
+[8 Usage](#8_Usage)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.1 Online manuals](#8_1_Online_man)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.2 Overview of the API](#8_2_API_overw)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.3 Example program](#8_3_Ex_prog)  
@@ -403,7 +403,7 @@ To uninstall (remove) a package (super user rights required):
 $ sudo dpkg -r crtn
 ```
 
-## <a name="8_Documentation"></a>8 Documentation
+## <a name="8_Usage"></a>8 Usage
 
 ### <a name="8_1_Online_man"></a>8.1 Online manuals
 
