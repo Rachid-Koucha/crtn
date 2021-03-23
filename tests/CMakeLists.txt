@@ -1,14 +1,9 @@
 INCLUDE_DIRECTORIES(../include)
 
-
-INCLUDE (../FindCheck.cmake)
-
-
 if (CHECK_FOUND)
 
   MESSAGE("CHECK_INCLUDE_DIR=" "${CHECK_INCLUDE_DIR}")
   MESSAGE("CHECK_LIBRARIES=" "${CHECK_LIBRARIES}")
-
 
   add_executable(check_all check_all.c
                            check_crtn_errcodes.c
@@ -18,6 +13,8 @@ if (CHECK_FOUND)
                            )
 
   target_link_libraries(check_all ${CHECK_LIBRARIES} crtn pthread)
+
+  add_test(crtn_tests check_all)
 
   #
   # Test coverage
@@ -31,13 +28,7 @@ if (CHECK_FOUND)
                               DEPENDENCIES crtn)
   endif()
 
-else(CHECK_FOUND)
-
-  MESSAGE("Check package not found ==> No unitary test will be built")
-
 endif(CHECK_FOUND)
-
-
 
 #
 # Examples and utilities related to timer algos

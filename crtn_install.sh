@@ -199,6 +199,10 @@ then
   echo ">" Deleting emacs backup files
   find . -type f -name \*~ -exec rm -f {} \; -print
 
+  echo ">" Deleting CTEST files
+  find . -type f -name CTestTestfile.cmake -exec rm -f {} \; -print
+  rm -rf Testing
+
   # Delete the packages
   find . -type f \( -name \*.tgz -o -name \*.tar.gz -o -name \*.tar.Z -o -name \*.deb -o -name \*.rpm -o -name crtn-\*-Linux-\*.sh \) -exec rm -f {} \; -print
 

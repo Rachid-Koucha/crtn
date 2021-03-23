@@ -137,7 +137,22 @@ $ sudo make uninstall
 
 ### <a name="4_4_Tests"></a>4.4 Tests
 
-To launch the regression tests (`check` package must be available on the system):
+To launch the regression tests, `check` package must be available on the system.
+
+The tests can be triggered through cmake's _test_ target:
+```
+$ make test
+Running tests...
+Test project /home/rachid/DEVS/GIT_BASE/crtn
+    Start 1: crtn_tests
+[...]
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  20.03 sec
+```
+The logs are located in _Testing_ sub-directory.
+
+The tests can be triggered by calling directly the executable in _tests_ sub-directory:
 ```
 $ tests/check_all
 Running suite(s): CRTN tests

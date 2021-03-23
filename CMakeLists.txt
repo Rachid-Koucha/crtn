@@ -199,10 +199,23 @@ FOREACH(man ${ONLINE_MANUALS})
 
 ENDFOREACH()
 
-
 ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(lib)
 ADD_SUBDIRECTORY(man)
+
+INCLUDE (FindCheck.cmake)
+
+if (CHECK_FOUND)
+
+  # Add the 'test' target
+  ENABLE_TESTING()
+
+else(CHECK_FOUND)
+
+  MESSAGE("Check package not found ==> No unitary test will be built")
+
+endif(CHECK_FOUND)
+
 ADD_SUBDIRECTORY(tests)
 
 # Must be in last position to take in account the preceding
