@@ -48,6 +48,7 @@ man/*.gz
 # Tests
 tests/check_all
 tests/fibonacci
+tests/fibonacci_cc
 tests/mywc
 tests/mywc1
 tests/mywc2

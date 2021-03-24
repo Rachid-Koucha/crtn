@@ -71,6 +71,8 @@ TARGET_LINK_LIBRARIES(mywc7 crtn)
 ADD_EXECUTABLE(fibonacci fibonacci.c)
 TARGET_LINK_LIBRARIES(fibonacci crtn)
 
+ADD_EXECUTABLE(fibonacci_cc fibonacci_cc.c)
+
 ADD_EXECUTABLE(switch_ctx2 switch_ctx2.c)
 TARGET_LINK_LIBRARIES(switch_ctx2 crtn)
 

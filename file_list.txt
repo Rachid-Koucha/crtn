@@ -64,6 +64,7 @@
 
 ./tests/CMakeLists.txt
 ./tests/fibonacci.c
+./tests/fibonacci_cc.c
 ./tests/sig.c
 ./tests/tcrtn.c
 ./tests/switch_ctx2.c

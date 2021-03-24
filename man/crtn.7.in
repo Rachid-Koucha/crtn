@@ -27,11 +27,11 @@ The latter returns a unique coroutine identifier (cid).
 Two types of coroutines are provided: stackless and stackful.
 
 .PP
-The stackless coroutines are typically used in environment where memory space is a constraint. But they suffer some limitations: the local variables content are no longer valid when there are resumed. The local variables must be reinitialized each time a coroutine is resumed. Moreover, it is not advised to suspend the execution of a stackless coroutine from a sub-function has the stack frames may be clobbered when the coroutine is resumed.
+The stackless coroutines are typically used in memory constrained environments. But they suffer some limitations: the local variables content are no longer valid when they are resumed. The local variables must be reinitialized each time a coroutine is resumed. Moreover, it is not advised to suspend the execution of a stackless coroutine from a sub-function has the stack frames may be clobbered when the coroutine is resumed.
 
 .PP
 The stackful coroutines have their own stack. So, there are no restrictions concerning the data stored in the stack. They are private to the coroutine.
-It is also possible to set the stack size to a value different than the default one.
+It is also possible to set the stack size to a value different than the default one (@CFG_CRTN_STACK_SIZE@ bytes).
 
 .PP
 Two scheduling types are provided: stepper and standalone.
@@ -85,6 +85,10 @@ Maximum number of semaphores (@CFG_CRTN_SEM_MAX@ by default).
 
 .IP CRTN_STACK_SIZE
 Size in bytes of the stack of stackless/stackful coroutines (@CFG_CRTN_STACK_SIZE@ by default).
+
+.PP
+Moreover, the previous variables are set with the defaults if their value is not coherent
+(0 or overflow or non integer value).
 
 .SH AUTHOR
 Rachid Koucha
