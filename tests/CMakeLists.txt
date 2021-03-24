@@ -65,6 +65,9 @@ endif()
 ADD_EXECUTABLE(mywc6 wc6.c)
 TARGET_LINK_LIBRARIES(mywc6 crtn)
 
+ADD_EXECUTABLE(mywc7 wc7.c)
+TARGET_LINK_LIBRARIES(mywc7 crtn)
+
 ADD_EXECUTABLE(fibonacci fibonacci.c)
 TARGET_LINK_LIBRARIES(fibonacci crtn)
 

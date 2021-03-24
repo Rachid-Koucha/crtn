@@ -55,6 +55,7 @@ tests/mywc3
 tests/mywc4
 tests/mywc5
 tests/mywc6
+tests/mywc7
 tests/sig
 tests/switch_ctx2
 tests/switch_ctx3

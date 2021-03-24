@@ -689,8 +689,10 @@ struct counter_t cnts;
 // Description : Non blocking read
 // Return      : Number of read bytes if OK
 //               -1, if error
+//               -2, timeout
+//               -3, EOF
 //----------------------------------------------------------------------------
-int nb_read(int fd, char *buf, size_t bufsz)
+int nb_read(int fd, char *buf, size_t bufsz, unsigned long to_ms)
 {
 int            rc;
 fd_set         fdset;
@@ -698,7 +700,7 @@ int            nfds = fd + 1;
 struct timeval to;
 
   to.tv_sec  = 0;
-  to.tv_usec = 0;
+  to.tv_usec = to_ms * 1000;
 
   while(1) {
     FD_ZERO(&fdset);
@@ -710,10 +712,7 @@ struct timeval to;
       // Error
       case -1 : {
         // Interrupted system call ?
-        if (EINTR == errno) {
-          to.tv_sec  = 0;
-          to.tv_usec = 0;
-        } else {
+        if (EINTR != errno) {
           return -1;
         }
       }
@@ -721,29 +720,32 @@ struct timeval to;
 
       // Timeout
       case 0: {
-        // No data ==> Retry with a timeout 5 ms
-        to.tv_usec = 5000;
+        return -2;        
       }
       break;
 
       // Incoming data
       default : {
         rc = read(fd, buf, bufsz);
+
+        // Error ?
         if (rc < 0) {
           return -1;
         }
 
+        // EOF ?
         if (0 == rc) {
-          buf[0] = EOF;
-          return 1;
+          return -3;
         }
 
+        // Data
         return rc;
       }
       break;
     } // End switch
   } // End while
 } // nb_read
+
 
 static int read_buffer(void)
 {
@@ -761,27 +763,81 @@ static int read_buffer(void)
                   cnts.nb_chars --;     \
                 } while(0)
 
-static void fill_buffer(void)
+static int fill_buffer(void)
 {
-  do {
-    // Upon EOF, nb_read() returns 1 with EOF in buffer[0]
-    w_offset = nb_read(0, buffer, BUFFER_SIZE);
+  int rc;
+  unsigned long to;
+  size_t size;
 
-    // If no error, there is at least an EOF in the buffer
-    if (w_offset > 0) {
-      r_offset = 0;
-      while (r_offset != w_offset) {
+  to = 0;
+  while(1) {
 
-        crtn_yield(0);
+    do {
 
-        if (buffer[w_offset-1] == EOF) {
-          return;
+      if (w_offset) {
+        // If buffer is empty, reset the pointers
+        if (w_offset == r_offset) {
+          w_offset = r_offset = 0;
         }
       }
-    }
-  } while (1);
-} // fill_buffer
 
+      size = BUFFER_SIZE - w_offset;
+
+      // There is still some space behind the write pointer, tries to fill
+      // it with additional input data
+      if (size) {
+        rc = nb_read(0, &(buffer[w_offset]), size, to);
+        to = 0;
+      } else {
+        // The wrtie pointer is at the end of the buffer and there
+        // are still remaining data to read
+        crtn_yield(0);
+      }
+
+    } while(size == 0);
+
+    switch(rc) {
+      case -1: {
+        // Error
+        buffer[w_offset] = EOF; // Trigger the end of the coroutines  
+        w_offset ++;
+        crtn_yield(0);
+        return -1;
+      }
+      break;
+
+      case -2: {
+        // Timeout
+        if (w_offset > r_offset) {
+          // There are still data to read in the buffer
+          crtn_yield(0);
+        } else {
+
+          // Buffer empty, wait for more input data
+          to = 250;  // Polling 250 ms
+        }
+      }
+      break;
+
+      case -3: {
+        // EOF
+        buffer[w_offset] = EOF; // Trigger the end of the coroutines  
+        w_offset ++;
+        crtn_yield(0);
+        return 0;
+      }
+      break;
+
+      default: {
+        // New data
+        w_offset += rc;
+        crtn_yield(0);
+      }
+      break;
+    } // End switch
+  } // End while
+
+} // fill_buffer
 
 static int get_spaces(void *p)
 {
@@ -875,6 +931,7 @@ int main(void)
   crtn_t cid_word, cid_spaces, cid_lines;
   int rc;
   int status;
+  int exit_code;
 
   rc = crtn_spawn(&cid_word, "word", get_word, 0, 0);
   if (rc != 0) {
@@ -897,27 +954,33 @@ int main(void)
     return 1;
   }
 
-  fill_buffer();
+  exit_code = 0;
+
+  rc = fill_buffer();
+  if (rc != 0) {
+    fprintf(stderr, "Input error '%m' (%d)\n", errno);
+    exit_code = 1;
+  }
 
   rc = crtn_join(cid_word, &status);
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
-    return 1;
+    exit_code = 1;
   }
 
   rc = crtn_join(cid_spaces, &status);
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
-    return 1;
+    exit_code = 1;
   }
 
   rc = crtn_join(cid_lines, &status);
   if (rc != 0) {
     errno = crtn_errno();
     fprintf(stderr, "crtn_join(): error '%m' (%d)\n", errno);
-    return 1;
+    exit_code = 1;
   }
 
   printf("Lines: %zu / Words: %zu / Spaces: %zu / Characters: %zu\n"
@@ -925,7 +988,7 @@ int main(void)
          cnts.nb_lines, cnts.nb_words, cnts.nb_spaces, cnts.nb_chars
         );
 
-  return status;
+  return exit_code;
 
 } // main
 ```

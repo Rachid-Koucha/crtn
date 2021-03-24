@@ -75,6 +75,7 @@
 ./tests/wc4.c
 ./tests/wc5.c
 ./tests/wc6.c
+./tests/wc7.c
 ./tests/mbx.c
 ./tests/check_all.c
 ./tests/check_util.c
