@@ -883,14 +883,14 @@ void crtn_get_size_env(
   if (env) {
     errno = 0;
     *value = (size_t)strtol(env, NULL, 10);
-    if (0 != errno) {
-      fprintf(stderr, "Bad value for '%s', error '%m' (%d)\n", name, errno);
+    if (0 != errno || (0 == *value)) {
+      fprintf(stderr, "Bad value '%s' for variable '%s', error '%m' (%d)\n", env, name, errno);
       *value = default_value;
     }
   } else {
     *value = default_value;
   }
-} // crtn_get_env
+} // crtn_get_size_env
 
 
 

@@ -102,6 +102,23 @@ START_TEST(test_crtn_fibonacci)
   // The programs returns the status of the cancelled coroutine
   ck_assert_exited(status, CRTN_STATUS_CANCELLED);
 
+  // ------- Config environment variables = 0
+  rc = setenv("CRTN_MAX", "0", 1);
+  ck_assert_int_eq(rc, 0);
+
+  av[0] = pathname;
+  av[1] = (char *)0;
+  rc = ck_exec_prog(av);
+  ck_assert_int_gt(rc, 0);
+  pid = rc;
+  sleep(2);
+  rc = kill(pid, SIGINT);
+  ck_assert_int_eq(rc, 0);
+  rc = waitpid(pid, &status, 0);
+  ck_assert_int_eq(rc, pid);
+  // The programs returns the status of the cancelled coroutine
+  ck_assert_exited(status, CRTN_STATUS_CANCELLED);
+
   // ------- Environment variable too big to trigger an error in strtol()
   rc = snprintf(max_long, sizeof(max_long), "%ld", LONG_MAX);
   if (rc < (int)(sizeof(max_long) - 1)) {
