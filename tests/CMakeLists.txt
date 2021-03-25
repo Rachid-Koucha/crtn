@@ -37,6 +37,8 @@ endif(CHECK_FOUND)
 ADD_EXECUTABLE(tcrtn tcrtn.c)
 TARGET_LINK_LIBRARIES(tcrtn crtn)
 
+ADD_EXECUTABLE(mywc_cc wc_cc.c)
+
 ADD_EXECUTABLE(mywc wc.c)
 TARGET_LINK_LIBRARIES(mywc crtn)
 

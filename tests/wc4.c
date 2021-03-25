@@ -59,7 +59,7 @@ struct counter_t cnts;
 // Return      : Number of read bytes if OK
 //               -1, if error
 //----------------------------------------------------------------------------
-int nb_read(int fd, char *buf, size_t bufsz)
+static int nb_read(int fd, char *buf, size_t bufsz)
 {
 int             rc;
 fd_set          fdset;
