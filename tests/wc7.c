@@ -61,7 +61,7 @@ struct counter_t cnts;
 //               -2, timeout
 //               -3, EOF
 //----------------------------------------------------------------------------
-int nb_read(int fd, char *buf, size_t bufsz, unsigned long to_ms)
+static int nb_read(int fd, char *buf, size_t bufsz, unsigned long to_ms)
 {
 int            rc;
 fd_set         fdset;

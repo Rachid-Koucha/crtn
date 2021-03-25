@@ -69,6 +69,7 @@
 ./tests/tcrtn.c
 ./tests/switch_ctx2.c
 ./tests/switch_ctx3.c
+./tests/wc_cc.c
 ./tests/wc.c
 ./tests/wc1.c
 ./tests/wc2.c
