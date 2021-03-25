@@ -1,6 +1,6 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // File        : fibonacci_cc.c
-// Description : Fibonacci sequence in caller/callee model
+// Description : Fibonacci sequence (caller/callee programming model)
 // License     :
 //
 //  Copyright (C) 2021 Rachid Koucha <rachid dot koucha at gmail dot com>
