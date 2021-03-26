@@ -64,7 +64,7 @@ SET(VERSION ${CRTN_VERSION})
 CONFIGURE_FILE(README.md.in README.md @ONLY)
 
 
-ADD_DEFINITIONS(-g -O2 -fsigned-char -freg-struct-return -Wall -W -Wshadow -Wstrict-prototypes -Wpointer-arith -Wcast-qual -Winline -Werror -pthread -D_GNU_SOURCE)
+ADD_DEFINITIONS(-g -O2 -fsigned-char -freg-struct-return -Wall -W -Wshadow -Wstrict-prototypes -Wpointer-arith -Wcast-qual -Winline -Werror)
 
 
 if (CMAKE_COVERAGE)
