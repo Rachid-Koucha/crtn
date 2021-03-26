@@ -25,6 +25,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[8.3.1 Generator](#8_3_1_Generator)  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[8.3.2 Producer/Consumer](#8_3_2_Prodcons)  
 &nbsp;&nbsp;&nbsp;&nbsp;[8.4 Configuration environment variables](#8_4_Cfg_env_var)  
+[9 Performance considerations](#9_Perf_cons)  
 
 ## <a name="1_Introduction"></a>1 Introduction
 
@@ -1016,3 +1017,13 @@ As described in `man 7 crtn`, several environment variables are interpreted at l
 - **CRTN_MBX_MAX**: Maximum number of semaphores (64 by default);
 - **CRTN_SEM_MAX**: Maximum number of semaphores (64 by default);
 - **CRTN_STACK_SIZE**: Size in bytes of the stack of stackless/stackful coroutines (16384 by default).
+
+## <a name="9_Perf_cons"></a>9 Performance considerations
+
+In several situations, user level scheduled coroutines are more optimal than threads which require a context switch in the Linux kernel for the scheduling. They may also offer better performances than programs written in the caller/callee model. For example, in recursive applications, they don't require to pop all the stack frames to return a result.
+
+But the underlying layer of `crtn` is based on the `get/make/swapcontext()` services. The latters trigger the `rt_sigprocmask()` system call to save/restore the signal mask. This is a drawback for some performance critical applications.
+
+If high performances are required, one may consider reimplementing `get/make/swapcontext()` services without the call to `rt_sigprocmask()`.
+ 
+
