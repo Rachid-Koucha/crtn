@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "crtn.h"
 
@@ -45,6 +46,8 @@ static crtn_mbx_t mbx;
 
 static unsigned int nb_chars, nb_words, nb_lines;
 
+static size_t r_offset;
+
 #define SPACE 0
 #define WORD  1
 #define LINE  2
@@ -56,7 +59,6 @@ static int read_buffer(void)
   int rc;
   static char *msg, *data;
   static size_t data_len;
-  static size_t r_offset;
 
   if (r_offset == data_len) {
 
@@ -75,30 +77,37 @@ static int read_buffer(void)
     r_offset = 0;
   }
 
+  nb_chars ++;
   return data[r_offset ++];
 } // read_buffer
+
+#define unread_buffer(c) do {           \
+                  assert(r_offset > 0); \
+                  -- r_offset;          \
+                  nb_chars --;          \
+                } while(0)
 
 
 static int get_spaces(int c)
 {
   while(1) {
 
+    c = read_buffer();
+
     if (isspace(c)) {
-      nb_chars ++;
       if (c == '\n') {
-        nb_lines ++;
+        unread_buffer(c);
         return LINE;
       }
     } else if (c == EOF) {
-      nb_lines ++;
+      unread_buffer(c);
       return END;
     } else {
-      nb_chars ++;
       nb_words ++;
+      unread_buffer(c);
       return WORD;
     }
 
-    c = read_buffer();
   } // End while
 
 } // get_spaces
@@ -108,22 +117,21 @@ static int get_word(int c)
 {
   while(1) {
 
+    c = read_buffer();
+
     if (isspace(c)) {
-      nb_chars ++;
       if (c == '\n') {
-        nb_lines ++;
+        unread_buffer(c);
         return LINE;
       } else {
+        unread_buffer(c);
         return SPACE;
       }
     } else if (c == EOF) {
-      nb_lines ++;
+      unread_buffer(c);
       return END;
-    } else {
-      nb_chars ++;
     }
 
-    c = read_buffer();
   } // End while
 
 } // get_word
@@ -133,22 +141,24 @@ static int get_lines(int c)
 {
   while(1) {
 
+    c = read_buffer();
+
     if (isspace(c)) {
-      nb_chars ++;
       if (c == '\n') {
         nb_lines ++;
       } else {
+        unread_buffer(c);
         return SPACE;
       }
     } else if (c == EOF) {
+      unread_buffer(c);
       return END;
     } else {
-      nb_chars ++;
       nb_words ++;
+      unread_buffer(c);
       return WORD;
     }
 
-    c = read_buffer();
   } // End while
 
 } // get_lines
@@ -162,12 +172,6 @@ static int counter(void *param)
   (void)param;
 
   while(state != END) {
-
-    c = read_buffer();
-
-    if (c == EOF) {
-      break;
-    }
 
     switch(state) {
 
