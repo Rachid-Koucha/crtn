@@ -138,7 +138,7 @@ $ sudo make uninstall
 
 ### <a name="4_4_Tests"></a>4.4 Tests
 
-To launch the regression tests, `check` package must be available on the system.
+To launch the regression tests, [check](https://libcheck.github.io/check/) package must be available on the system.
 
 The tests can be triggered through cmake's _test_ target:
 ```
@@ -288,7 +288,7 @@ To cleanup every generated files to go back to original source tree:
 
 ### <a name="5_3_Tests"></a>5.3 Tests
 
-The regression tests are based on `check` package. The latter must be installed
+The regression tests are based on [check](https://libcheck.github.io/check/) package. The latter must be installed
 prior launching the tests.
 
 To trigger the regression tests for the whole software:
