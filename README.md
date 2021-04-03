@@ -112,7 +112,7 @@ HAVE_CRTN_SEM:BOOL=ON
 
 ### <a name="4_2_Build"></a>4.2 Build
 
-The build is launched from the build directory previously created and configured:
+The build is launched from the _build_ directory previously created and configured:
 ```
 $ make
 [  1%] Building C object lib/CMakeFiles/crtn.dir/crtn.c.o
@@ -155,7 +155,7 @@ $ sudo make uninstall
 
 To launch the regression tests, [check](https://libcheck.github.io/check/) package must be available on the system.
 
-The tests can be triggered through cmake's _test_ target from the build directory:
+The tests can be triggered through cmake's _test_ target from the _build_ directory:
 ```
 $ make test
 Running tests...
@@ -177,7 +177,7 @@ Running suite(s): CRTN tests
 
 ### <a name="4_5_Tests_coverage"></a>4.5 Tests coverage measurement
 
-The tests coverage with the semaphore/mailbox optional services can be done from the build directory. The last parameter passed to `cmake` is the pathname of the source tree. Here it is "..":
+The tests coverage with the semaphore/mailbox optional services can be done from the _build_ directory. The last parameter passed to `cmake` is the pathname of the source tree. Here it is "..":
 ```
 $ make clean
 $ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug ..
@@ -209,7 +209,7 @@ The resulting _./all_coverage/index.html_ file can be viewed in a browser to get
 
 ### <a name="4_6_Packaging"></a>4.6 Packaging
 
-The generation of the DEB, RPM, TGZ and STGZ packages with the semaphore/mailbox optional services is done from the build directory. The last parameter passed to `cmake` is the pathname of the source tree. Here it is "..":
+The generation of the DEB, RPM, TGZ and STGZ packages with the semaphore/mailbox optional services is done from the _build_ directory. The last parameter passed to `cmake` is the pathname of the source tree. Here it is "..":
 
 ```
 $ make clean
