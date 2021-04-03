@@ -172,13 +172,13 @@ function(SETUP_TARGET_FOR_COVERAGE)
         COMMAND ${Coverage_EXECUTABLE}
 
         # Capturing lcov counters and generating report
-        COMMAND ${LCOV_PATH} --directory ${Coverage_SRCDIR} --capture --no-external --output-file ${Coverage_NAME}.info
+        COMMAND ${LCOV_PATH} --directory ${Coverage_SRCDIR} --capture --output-file ${Coverage_NAME}.info
         COMMAND ${LCOV_PATH} --remove ${Coverage_NAME}.info ${Coverage_EXCLUDES} --output-file ${Coverage_NAME}.info.cleaned
         COMMAND ${GENHTML_PATH} -o ${Coverage_NAME} ${Coverage_NAME}.info.cleaned
         # COMMAND ${GENHTML_PATH} -o ${Coverage_NAME} ${Coverage_NAME}.info
         COMMAND ${CMAKE_COMMAND} -E remove ${Coverage_NAME}.info ${Coverage_NAME}.info.cleaned
 
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         DEPENDS ${Coverage_DEPENDENCIES}
         COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report for ${Coverage_SRCDIR}."
     )
@@ -186,7 +186,7 @@ function(SETUP_TARGET_FOR_COVERAGE)
     # Show info where to find the report
     add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
         COMMAND ;
-        COMMENT "Open ./${Coverage_NAME}/index.html in your browser to view the coverage report."
+        COMMENT "Open ${CMAKE_BINARY_DIR}/${Coverage_NAME}/index.html in your browser to view the coverage report."
     )
 
 endfunction() # SETUP_TARGET_FOR_COVERAGE

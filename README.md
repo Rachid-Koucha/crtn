@@ -10,12 +10,14 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[4.4 Tests](#4_4_Tests)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.5 Tests coverage measurement](#4_5_Tests_coverage)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.6 Packaging](#4_6_Packaging)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.7 Cross-compiling](#4_7_Cross_compiling)  
 [5 Administration with crtn_install.sh](#5_Adm_script)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.1 crtn_install.sh script](#5_1_crtn_install_sh_scritpt)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.2 Build, installation, cleanup](#5_2_Build_installation_cleanup)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.3 Tests](#5_3_Tests)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.4 Tests coverage measurement](#5_4_Tests_coverage_measurement)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.5 Packaging](#5_5_Packaging)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.6 Cross-compiling](#5_6_Cross_compiling)  
 [6 Usage](#6_Usage)  
 &nbsp;&nbsp;&nbsp;&nbsp;[6.1 Online manuals](#6_1_Online_man)  
 &nbsp;&nbsp;&nbsp;&nbsp;[6.2 Overview of the API](#6_2_API_overw)  
@@ -31,9 +33,9 @@
 
 ## <a name="1_Introduction"></a>1 Introduction
 
-CoRouTiNe (`crtn`) is an API providing [coroutines](https://en.wikipedia.org/wiki/Coroutine) in C language programs.
-They are concurrent execution flows that can be suspended or resumed under the control of the user.
-The underlying operating system has no idea of their existence.
+CoRouTiNe (`crtn`) is an API providing [coroutines](https://en.wikipedia.org/wiki/Coroutine)
+in C language programs. They are concurrent execution flows that can be suspended or resumed
+under the control of the user. The underlying operating system has no idea of their existence.
 
 The service is an abstraction layer implemented as a shared library on top of GLIBC:
 
@@ -41,14 +43,11 @@ The service is an abstraction layer implemented as a shared library on top of GL
 
 `crtn` is distributed under the GNU LGPL license.
 
-The current document concerns `crtn` version **0.2.1**.
-
+The current document concerns `crtn` version **0.2.2**.
 
 ## <a name="2_Maintainers"></a>2 Maintainers
 
-
 To report a bug or design enhancement, please contact [Rachid Koucha](mailto:rachid.koucha@gmail.com)
-
 
 ## <a name="3_Download"></a>3 Download
 
@@ -56,10 +55,10 @@ The source code is available on github. Use the following command to clone it:
 ```
 $ git clone https://github.com/Rachid-Koucha/crtn.git
 ```
-To get the source code of the 0.2.1 version:
+To get the source code of the 0.2.2 version:
 ```
 $ cd crtn
-crtn$ git checkout tags/v0.2.1
+crtn$ git checkout tags/v0.2.2
 ```
 
 The source tree is:
@@ -68,14 +67,28 @@ The source tree is:
 
 ## <a name="4_Adm_cmake"></a>4 Administration with cmake
 
+In the following paragraphs, we suppose that the the source code tree is located in _$HOME/crtn_.
+
+To avoid the pollution of the source code tree with generated objects, it is preferable to make
+an out of source configuration and build. So, we create a build directory. For example, _/tmp/crtn_build_:
+```
+$ mkdir /tmp/crtn_build
+$ cd /tmp/crtn_build
+```
+
 ### <a name="4_1_Cfg"></a>4.1 Configuration
 
-To configure the package:
+To configure the build:
+
 ```
-$ cmake .
--- Configuring CRTN version 0.2.1
-The user id is 1000
+$ ls
+$ cmake $HOME/crtn
 [...]
+-- Configuring CRTN version 0.2.2
+[...]
+-- Build files have been written to: /tmp/crtn_build
+$ ls
+CMakeCache.txt  CMakeFiles  CPackConfig.cmake [...]
 ```
 
 Some optional services can be set by cmake variables:
@@ -91,39 +104,47 @@ HAVE_CRTN_SEM:BOOL=OFF
 
 To configure the package with the optional mailbox and semaphore services:
 ```
-$ cmake . -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON
--- Configuring CRTN version 0.2.1
-The user id is 1000
+$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON $HOME/crtn
+-- Configuring CRTN version 0.2.2
 [...]
+-- Build files have been written to: /tmp/crtn_build
+$ cmake -LH
+[...]
+// Mailbox service
+HAVE_CRTN_MBX:BOOL=ON
+
+// Semaphore service
+HAVE_CRTN_SEM:BOOL=ON
 ```
 
 ### <a name="4_2_Build"></a>4.2 Build
 
-To launch the build:
+To build the software:
 ```
 $ make
 [  1%] Building C object lib/CMakeFiles/crtn.dir/crtn.c.o
 [  3%] Building C object lib/CMakeFiles/crtn.dir/crtn_mbx.c.o
 [...]
+$ ls lib
+[...]libcrtn.so  libcrtn.so.0  libcrtn.so.0.2.2
 ```
 
 To clean the built files:
 ```
 $ make clean
+$ ls lib
+CMakeFiles  Makefile  cmake_install.cmake
 ```
 
 ### <a name="4_3_Installation"></a>4.3 Installation
 
-To install the software:
+To install the software in the default _/usr/local_ directory:
 ```
 $ sudo make install
-```
-By default, the library and the manuals are installed under _/usr/local_:
-```
 $ ls -l /usr/local/lib/libcrtn.so*
 lrwxrwxrwx 1 root root    12 mars   21 12:04 /usr/local/lib/libcrtn.so -> libcrtn.so.0
-lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.0 -> libcrtn.so.0.2.1
--r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.0.2.1
+lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.0 -> libcrtn.so.0.2.2
+-r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.0.2.2
 $ ls -l /usr/local/share/man/man3/crtn*
 -r--r--r-- 1 root root 2786 mars   21 12:04 /usr/local/share/man/man3/crtn.3.gz
 -r--r--r-- 1 root root   55 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_delete.3.gz
@@ -136,6 +157,8 @@ $ ls -l /usr/local/share/man/man7/crtn*
 To uninstall the software:
 ```
 $ sudo make uninstall
+$ ls -l /usr/local/share/man/man3/crtn*
+ls: cannot access '/usr/local/share/man/man3/crtn*': No such file or directory
 ```
 
 ### <a name="4_4_Tests"></a>4.4 Tests
@@ -146,34 +169,41 @@ The tests can be triggered through cmake's _test_ target:
 ```
 $ make test
 Running tests...
-Test project /home/rachid/DEVS/GIT_BASE/crtn
+Test project /tmp/crtn_build
     Start 1: crtn_tests
-[...]
+1/1 Test #1: crtn_tests .......................   Passed   22.03 sec
+
 100% tests passed, 0 tests failed out of 1
 
-Total Test time (real) =  20.03 sec
+Total Test time (real) =  22.03 sec
 ```
-The logs are located in _Testing_ sub-directory.
-
-The tests can be triggered by calling directly the executable in _tests_ sub-directory:
+The logs are located in _Testing_ sub-directory:
+```
+$ ls Testing
+Temporary
+$ ls Testing/Temporary
+CTestCostData.txt  LastTest.log
+```
+The tests can also be triggered by calling directly the executable in _tests_ sub-directory:
 ```
 $ tests/check_all
 Running suite(s): CRTN tests
-100%: Checks: 31, Failures: 0, Errors: 0
+[...]
+100%: Checks: 32, Failures: 0, Errors: 0
 ```
 
 ### <a name="4_5_Tests_coverage"></a>4.5 Tests coverage measurement
 
-To launch the tests coverage with the semaphore/mailbox optional services:
+To triggered the tests coverage measurement with the semaphore/mailbox optional services:
 ```
 $ make clean
-$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug .
--- Configuring CRTN version 0.2.1
+$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug $HOME/crtn
+-- Configuring CRTN version 0.2.2
 CMAKE_C_COMPILER_ID=GNU
 -- Appending code coverage compiler flags: -g -O0 --coverage -fprofile-arcs -ftest-coverage
 [...]
 $ make
--- Configuring CRTN version 0.2.1
+-- Configuring CRTN version 0.2.2
 CMAKE_C_COMPILER_ID=GNU
 -- Appending code coverage compiler flags: -g -O0 --coverage -fprofile-arcs -ftest-coverage
 [...]
@@ -186,10 +216,10 @@ Capturing coverage data from .
 Overall coverage rate:
   lines......: 95.8% (527 of 550 lines)
   functions..: 100.0% (40 of 40 functions)
-Open ./all_coverage/index.html in your browser to view the coverage report.
+Open .../all_coverage/index.html in your browser to view the coverage report.
 [100%] Built target all_coverage
 ```
-The resulting _./all_coverage/index.html_ file can be viewed in a browser to get something like this:
+The resulting _/tmp/crtn_build/all_coverage/index.html_ file can be viewed in a browser to get something like this:
 
 <p align="center"><img src="doc/crtn_coverage.png"></p>
 
@@ -200,18 +230,39 @@ To generate the DEB, RPM, TGZ and STGZ packages with the semaphore/mailbox optio
 
 ```
 $ make clean
-$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCPACK_GENERATOR="DEB;RPM;TGZ;STGZ" -DCMAKE_INSTALL_PREFIX=/usr/local .
-$ make clean
+$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCPACK_GENERATOR="DEB;RPM;TGZ;STGZ" -DCMAKE_INSTALL_PREFIX=/usr/local $HOME/crtn
 $ make
 $ make package
 [...]
-CPack: - package: .../crtn/crtn_0.2.1_amd64.deb generated.
+CPack: - package: .../crtn/crtn_0.2.2_amd64.deb generated.
 [...]
-Pack: - package: .../crtn/crtn-0.2.1-1.x86_64.rpm generated.
+Pack: - package: .../crtn/crtn-0.2.2-1.x86_64.rpm generated.
 [...]
-CPack: - package: .../crtn/crtn-0.2.1-Linux-crtn.tar.gz generated.
+CPack: - package: .../crtn/crtn-0.2.2-Linux-crtn.tar.gz generated.
 [...]
-CPack: - package: .../crtn/crtn-0.2.1-Linux-crtn.sh generated.
+CPack: - package: .../crtn/crtn-0.2.2-Linux-crtn.sh generated.
+```
+
+### <a name="4_7_Cross_compiling"></a>4.7 Cross-compiling
+
+To cross-compile with `cmake`, a toolchain file is required. Some examples are provided in the source tree
+in _cmake/toolchains_.
+
+To trigger the cross-build of the library for a Raspberry Pi card (32-bits ARM processor):
+```
+$ make clean
+$ rm CMakeCache.txt
+$ cmake -DCMAKE_TOOLCHAIN_FILE=$HOME/crtn/cmake/toolchains/arm-linux-gnueabihf.cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON $HOME/crtn
+-- The C compiler identification is GNU 9.3.0
+-- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc
+-- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc -- works
+[...]
+$ make
+[  1%] Building C object lib/CMakeFiles/crtn.dir/crtn.c.o
+[  3%] Building C object lib/CMakeFiles/crtn.dir/crtn_mbx.c.o
+[...]
+$ file lib/libcrtn.so.0.2.2
+lib/libcrtn.so.0.2.2: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
 ```
 
 ## <a name="5_Adm_script"></a>5 Administration with crtn_install.sh
@@ -219,28 +270,30 @@ CPack: - package: .../crtn/crtn-0.2.1-Linux-crtn.sh generated.
 
 ### <a name="5_1_crtn_install_sh_scritpt"></a>5.1 crtn_install.sh script
 
+This shell script is a swiss army knife to make several things. It implicitly uses `cmake`.
+The tool is to be used from the top level of the source tree.
 
-This shell script is a swiss army knife to make several things. It implicitly uses `cmake`. To display the help, use the `-h` option:
-
+To display the help, use the `-h` option:
 ```
 $ ./crtn_install.sh -h
 
 Usage:
 
-  crtn_install.sh [-b browser] [-c] [-T|-C] [-d install_dir] [-o MBX|SEM]
-                  [-B] [-I] [-U] [-A] [-P RPM|DEB|TGZ|STGZ] [-h]
+  crtn_install.sh [-c] [-T|-C [browser]] [-d install_dir] [-o MBX|SEM] [-I] [-U]
+                  [-B] [-A] [-P RPM|DEB|TGZ|STGZ] [-b build_dir] [-X toolchain] [-h]
 
-    -b    : Browser's pathname to display the test coverage HTML results
     -c    : Cleanup built objects
-    -C    : Launch the test coverage measurement
+    -C [browser]: Launch test the coverage measurement (results are displayed with 'browser')
     -T    : Launch the regression tests
     -d    : Installation directory (default: /usr/local)
-    -P (*): Generate DEB/RPM/TGZ/STGZ packages
+    -P RPM|DEB|TGZ|STGZ: Generate packages
     -B    : Build the software
+    -b build_dir: Build directory (default: build)
     -I (*): Install the software
     -U (*): Uninstall the software
     -A    : Generate an archive of the software (sources)
     -o    : Add MBX|SEM service
+    -X toolchain: Cross-build with a given toolchain file
     -h    : this help
 
    (*) Super user rights required
@@ -248,28 +301,38 @@ Usage:
 
 Note that some options require super user privileges. Use `sudo` for example.
 
+In the following paragraphs, we suppose that the the source code tree is located in _$HOME/crtn_.
+
+To avoid the pollution of the source code tree with generated objects, it is preferable to make
+an out of source configuration and build. The build directory is specified with the `-b` option.
+By default, a sub-directory called _build_ is created by the tool at the top level of the source tree.
 
 ### <a name="5_2_Build_installation_cleanup"></a>5.2 Build, installation, cleanup
 
-
+To clean everything, go to the top level of the source tree:
+````
+$ ./crtn_install.sh -c
+```
 To build the library:
-
-`$ ./crtn_install.sh -B`
-
-If mailbox and/or semaphores are required, add the corresponding option on the command line:
-
-`$ ./crtn_install.sh -B -o mbx -o sem`
+```
+$ ./crtn_install.sh -B
+$ ls build
+[...]include  lib  man  tests
+$ ls build/lib
+[...]libcrtn.so  libcrtn.so.0  libcrtn.so.0.2.2
+```
+If mailbox and/or semaphores services are required, add the corresponding options on the command line:
+```
+$ ./crtn_install.sh -B -o mbx -o sem
+```
 
 For a complete installation in the default _/usr/local_ subtree (super user rights required):
-
-`$ sudo ./crtn_install.sh -I`
-
-By default, the library and the manuals are installed under _/usr/local_:
 ```
+$ sudo ./crtn_install.sh -I
 $ ls -l /usr/local/lib/libcrtn.so*
 lrwxrwxrwx 1 root root    12 mars   21 12:04 /usr/local/lib/libcrtn.so -> libcrtn.so.0
-lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.0 -> libcrtn.so.0.2.1
--r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.0.2.1
+lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.0 -> libcrtn.so.0.2.2
+-r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.0.2.2
 $ ls -l /usr/local/share/man/man3/crtn*
 -r--r--r-- 1 root root 2786 mars   21 12:04 /usr/local/share/man/man3/crtn.3.gz
 -r--r--r-- 1 root root   55 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_delete.3.gz
@@ -280,24 +343,27 @@ $ ls -l /usr/local/share/man/man7/crtn*
 -r--r--r-- 1 root root 1436 mars   21 12:04 /usr/local/share/man/man7/crtn.7.gz
 ```
 To uninstall the software (super user rights required):
-
-`$ sudo ./crtn_install.sh -U`
-
+```
+$ sudo ./crtn_install.sh -U
+$ ls -l /usr/local/share/man/man7/crtn*
+ls: cannot access '/usr/local/share/man/man7/crtn*': No such file or directory
+```
 To cleanup every generated files to go back to original source tree:
-
-`$ ./crtn_install.sh -c`
-
+```
+$ ./crtn_install.sh -c
+Removing 'build' directory
+```
 
 ### <a name="5_3_Tests"></a>5.3 Tests
 
 The regression tests are based on [check](https://libcheck.github.io/check/) package. The latter must be installed
 prior launching the tests.
 
-To trigger the regression tests for the whole software:
+To trigger the regression tests for the whole software (i.e. with the optional mailbox and semaphore services):
 ```
-$ ./crtn_install.sh -T
+$ ./crtn_install.sh -T -o mbx -o sem
 [...]
-100%: Checks: 31, Failures: 0, Errors: 0
+100%: Checks: 32, Failures: 0, Errors: 0
 ```
 
 ### <a name="5_4_Tests_coverage_measurement"></a>5.4 Tests coverage measurement
@@ -305,34 +371,45 @@ $ ./crtn_install.sh -T
 The test coverage measurement requires the `gcov/lcov` packages.
 
 To trigger test coverage measurement for `crtn` (with a display of the result in firefox):
-
-`$ ./crtn_install.sh -C -b firefox`
-
+```
+$ ./crtn_install.sh -C firefox
+```
 This shows something like this in the browser:
 
 <p align="center"><img src="doc/crtn_coverage.png"></p>
 
-
 ### <a name="5_5_Packaging"></a>5.5 Packaging
 
 To make a tar gzip source package, use the `-A` option of `crtn_install.sh`:
+```
+$ ./crtn_install.sh -A
+[...]
+Building archive build/crtn_src-0.2.2.tgz...
+```
+It is also possible to generate Debian (_deb_), Red-Hat Package Manager (_rpm_), Tar GZipped (_tgz_)
+and Self Extracting Tar GZipped (_stgz_) binary packages:
+```
+$ ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz
+```
+This makes the following binary packages in the _build_ sub-directory:
+* _crtn_0.2.2_amd64.deb (deb)_
+* _crtn-0.2.2-1.x86_64.rpm (rpm)_
+* _crtn-0.2.2-Linux-crtn.tar.gz (tgz)_
+* _crtn-0.2.2-Linux-crtn.sh (stgz)_
 
-`$ ./crtn_install.sh -A`
+### <a name="5_6_Cross_compiling"></a>5.6 Cross-compiling
 
-This makes a `tgz` file of the complete source tree: _crtn_src-0.2.1.tgz_
-
-
-It is also possible to generate Debian (_deb_), Red-Hat Package Manager (_rpm_), Tar GZipped (_tgz_) and Self Extracting Tar GZipped (_stgz_) binary packages.
-
-To build the packages _tgz_, _deb_, _rpm_... (super user rights required):
-
-`$ sudo ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz`
-
-This makes the following binary packages:
-* _crtn_0.2.1_amd64.deb (deb)_
-* _crtn-0.2.1-1.x86_64.rpm (rpm)_
-* _crtn-0.2.1-Linux-crtn.tar.gz (tgz)_
-* _crtn-0.2.1-Linux-crtn.sh (stgz)_
+To cross-compile with `cmake`, a toolchain file is required. Some examples are provided in the source tree
+in _cmake/toolchains_.
+```
+$ ./crtn_install.sh -X $HOME/crtn/cmake/toolchains/arm-linux-gnueabihf.cmake -o sem -o mbx
+-- The C compiler identification is GNU 9.3.0
+-- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc
+-- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc -- works
+[...]
+$ file build/lib/libcrtn.so.0.2.2
+lib/libcrtn.so.0.2.2: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
+```
 
 ## <a name="6_Usage"></a>6 Usage
 
@@ -945,15 +1022,15 @@ If high performances are required, one may consider reimplementing `get/make/swa
 
 To get information on a package file:
 ```
-$ rpm -qp --info crtn-0.2.1-1.x86_64.rpm
+$ rpm -qp --info crtn-0.2.2-1.x86_64.rpm
 Name        : crtn
-Version     : 0.2.1
+Version     : 0.2.2
 Release     : 1
 Architecture: x86_64
 [...]
 License     : GPL/LGPL
 Signature   : (none)
-Source RPM  : crtn-0.2.1-1.src.rpm
+Source RPM  : crtn-0.2.2-1.src.rpm
 [...]
 Relocations : /usr/local 
 Vendor      : Rachid Koucha
@@ -964,7 +1041,7 @@ CoRouTiNe API for C language
 ```
 To get the pre/post-installation scripts in a package file:
 ```
-$ rpm -qp --scripts rsys-0.2.1-1.x86_64.rpm
+$ rpm -qp --scripts rsys-0.2.2-1.x86_64.rpm
 preinstall program: /bin/sh
 postinstall scriptlet (using /bin/sh):
 
@@ -982,20 +1059,20 @@ $ rpm -ql crtn
 ```
 To list the files in a package file:
 ```
-$ rpm -ql crtn-0.2.1-1.x86_64.rpm
+$ rpm -ql crtn-0.2.2-1.x86_64.rpm
 ```
 The required package list of an _rpm_ file could be printed with:
 ```
-$ rpm -qp --requires crtn-0.2.1-1.x86_64.rpm
+$ rpm -qp --requires crtn-0.2.2-1.x86_64.rpm
 ```
 ### <a name="A_2_Notes_deb"></a>A.2 Notes about DEB package
 
 To get information on a package file:
 ```
-$ dpkg --info crtn_0.2.1_amd64.deb
+$ dpkg --info crtn_0.2.2_amd64.deb
 [...]
  Package: crtn
- Version: 0.2.1
+ Version: 0.2.2
  Section: devel
  Priority: optional
  Architecture: amd64
@@ -1006,11 +1083,11 @@ $ dpkg --info crtn_0.2.1_amd64.deb
 ```
 To list the files in a package file:
 ```
-$ dpkg -c crtn_0.2.1_amd64.deb
+$ dpkg -c crtn_0.2.2_amd64.deb
 ```
 To install the content of a package file (super user rights required):
 ```
-$ sudo dpkg -i crtn_0.2.1_amd64.deb
+$ sudo dpkg -i crtn_0.2.2_amd64.deb
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/include/
@@ -1022,7 +1099,7 @@ lrwxrwxrwx root/root         0 2021-03-12 20:06 ./usr/local/lib/libcrtn.so
 To list the installed packages:
 ```
 $ dpkg -l | grep crtn
-ii  crtn  0.2.1    amd64   CoRouTiNe API for C language
+ii  crtn  0.2.2    amd64   CoRouTiNe API for C language
 ```
 To uninstall (remove) a package (super user rights required):
 ```

@@ -35,6 +35,7 @@ todo.txt
 crtn.h
 
 # Build
+build/
 *.o
 *.so
 *.so.*
