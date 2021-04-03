@@ -50,10 +50,10 @@
 #endif // CRTN_GCC_VERSION
 
 //---------------------------------------------------------------------------
-// Name : CRTN_ROOT_SRC
-// Usage: Pathname of the source tree
+// Name : CRTN_BUILD_DIR
+// Usage: Pathname of the build directory
 //----------------------------------------------------------------------------
-#define CRTN_ROOT_SRC "@CMAKE_SOURCE_DIR@"
+#define CRTN_BUILD_DIR "@CMAKE_BINARY_DIR@"
 
 
 //---------------------------------------------------------------------------

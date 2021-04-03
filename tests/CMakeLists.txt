@@ -1,4 +1,4 @@
-INCLUDE_DIRECTORIES(../include)
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/include)
 
 if (CHECK_FOUND)
 
@@ -22,7 +22,7 @@ if (CHECK_FOUND)
   if (CMAKE_COVERAGE)
 
     setup_target_for_coverage(NAME all_coverage
-                              SRCDIR .
+                              SRCDIR ${CMAKE_BINARY_DIR}
                               EXCLUDES '/usr/include/*'  '/*/tests/*'
                               EXECUTABLE tests/check_all
                               DEPENDENCIES crtn)

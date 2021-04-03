@@ -68,7 +68,7 @@ START_TEST(test_crtn_fibonacci)
   int status;
   char max_long[100];
 
-  snprintf(pathname, sizeof(pathname), "%s/tests/fibonacci", CRTN_ROOT_SRC);
+  snprintf(pathname, sizeof(pathname), "%s/tests/fibonacci", CRTN_BUILD_DIR);
 
   // -------
 
