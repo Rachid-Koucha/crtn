@@ -6,16 +6,17 @@
 ./NEWS
 ./README.md.in
 
-./CodeCoverage.cmake
-
 ./CMakeLists.txt
-./FindCheck.cmake
-./FindGZIP.cmake
 ./cmake_uninstall.cmake.in
 ./config.h.cmake
 ./crtn.postinst.in
 ./crtn_install.sh
 ./file_list.txt
+
+./cmake/toolchains/arm-linux-gnueabihf.cmake
+./cmake/modules/FindCheck.cmake
+./cmake/modules/FindGZIP.cmake
+./cmake/modules/CodeCoverage.cmake
 
 ./include/CMakeLists.txt
 ./include/crtn.h.in

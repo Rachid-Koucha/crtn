@@ -20,19 +20,20 @@
 #
 
 
-TMPDIR="/tmp/crtn_$$"
+SW_NAME=CRTN
+TMP_DIR="/tmp/crtn_$$"
+BUILD_DIR_DEFAULT="build"
+BUILD_DIR=${BUILD_DIR_DEFAULT}
 
-
-
-cleanup()
+cleanup_exit()
 {
-  if [ -d ${TMPDIR} ]
+  if [ -d ${TMP_DIR} ]
   then
-    rm -rf ${TMPDIR}
+    rm -rf ${TMP_DIR}
   fi
 }
 
-trap 'cleanup' HUP INT EXIT TERM QUIT
+trap 'cleanup_exit' HUP INT EXIT TERM QUIT
 
 
 # Default values
@@ -46,9 +47,7 @@ BROWSER=
 ARCHIVE_IT=0
 CLEANUP=0
 CPACK_GENERATOR=
-
-
-uid=`id -u`
+TOOLCHAIN=
 
 
 # User manual
@@ -56,25 +55,27 @@ help()
 {
 PLIST="RPM|DEB|TGZ|STGZ"
 OPTLIST="MBX|SEM"
+TOOL_CHAINS=$(ls cmake/toolchains)
 
   {
     echo
     echo Usage:
     echo
-    echo '  '`basename $1` "[-b browser] [-c] [-T|-C] [-d install_dir] [-o ${OPTLIST}]"
-    echo "                  [-B] [-I] [-U] [-A] [-P ${PLIST}] [-h]"
+    echo '  '`basename $1` "[-c] [-T|-C [browser]] [-d install_dir] [-o ${OPTLIST}] [-I] [-U]"
+    echo "                  [-B] [-A] [-P ${PLIST}] [-b build_dir] [-X toolchain] [-h]"
     echo
-    echo "    -b    : Browser's pathname to display the test coverage HTML results"
     echo "    -c    : Cleanup built objects"
-    echo "    -C    : Launch test the coverage measurement"
+    echo "    -C [browser]: Launch test the coverage measurement (results are displayed with 'browser')"
     echo "    -T    : Launch the regression tests"
     echo "    -d    : Installation directory (default: ${INST_DIR})"
-    echo "    -P (*): Generate ${PLIST} package"
+    echo "    -P ${PLIST}: Generate packages"
     echo "    -B    : Build the software"
+    echo "    -b build_dir: Build directory (default: ${BUILD_DIR})"
     echo "    -I (*): Install the software"
     echo "    -U (*): Uninstall the software"
     echo "    -A    : Generate an archive of the software (sources)"
     echo "    -o    : Add ${OPTLIST} service"
+    echo "    -X toolchain: Cross-build with a given toolchain file"
     echo "    -h    : this help"
     echo
     echo "   (*) Super user rights required"
@@ -92,13 +93,102 @@ then
 fi
 
 
+check_tool()
+{
+  which $1 > /dev/null 2>&1
+  if [ $? -ne 0 ]
+  then
+    echo $1 tool is required \(is it installed or in the PATH variable?\) >&2
+    exit 1
+  fi
+}
+
+
+OPTSTRING=":cd:P:BIUATC:o:b:X:h"
+
+manage_optional_arg()
+{
+  
+  case $1 in
+    C) COV_IT=1;;
+    *) echo Missing argument for option -$1 >&2
+       help $0
+       exit 1;;
+  esac
+
+}
+
+check_optional_arg()
+{
+  ARG=$1
+
+  if [ ${ARG:0:1} = "-" ]
+  then
+     return 1
+  else
+     return 0
+  fi
+
+}
+
+clean_build()
+{
+  if [ -d ${BUILD_DIR} ]
+  then
+    echo Removing \'${BUILD_DIR}\' directory
+    rm -rf ${BUILD_DIR}
+  fi
+}
+
+check_build_dir()
+{
+  # To avoid the destruction of existing directories and files
+  # not related to crtn
+  if [ -d $1 ]
+  then
+     files=`ls $1 | wc -l`
+     if [ "$files" != "0" ]
+     then
+       [ ! -f $1/.${SW_NAME} ] && echo "Directory '$1' does not seem to belong to ${SW_NAME}" >&2 && exit 1
+     fi
+  fi
+}
+
+create_build_dir()
+{
+  # Make the build directory
+  if [ ! -d ${BUILD_DIR} ]
+  then
+      mkdir -p ${BUILD_DIR}
+      if [ $? -ne 0 ]
+      then 
+        echo Unable to create build directory \'${BUILD_DIR}\' >&2
+        exit 1
+      fi
+      > ${BUILD_DIR}/.${SW_NAME}
+  fi
+}
+
+
 # Parse the command line
-while getopts cd:P:BIUATCb:o:h arg
+while getopts ${OPTSTRING} arg
 do
   case ${arg} in
     c) CLEANUP=1;;
-    d) INST_DIR=${OPTARG};;
+    d) check_optional_arg ${OPTARG}
+       if [ $? -ne 0 ]
+       then echo Missing argument for option -${arg} >&2
+            help $0
+            exit 1
+       fi
+       INST_DIR=${OPTARG};;
     P) OPTARG=`echo ${OPTARG} | tr [:lower:] [:upper:]`
+       check_optional_arg ${OPTARG}
+       if [ $? -ne 0 ]
+       then echo Missing argument for option -${arg} >&2
+            help $0
+            exit 1
+       fi
        if [ ${OPTARG} = "DEB" ]
        then if [ -n "${CPACK_GENERATOR}" ]
             then CPACK_GENERATOR="${CPACK_GENERATOR};DEB"
@@ -124,6 +214,12 @@ do
             exit 1
        fi;;
     o) OPTARG=`echo ${OPTARG} | tr [:lower:] [:upper:]`
+       check_optional_arg ${OPTARG}
+       if [ $? -ne 0 ]
+       then echo Missing argument for option -${arg} >&2
+            help $0
+            exit 1
+       fi
        if [ ${OPTARG} = "MBX" ]
        then if [ -n "${CONFIG_DEFINES}" ]
             then CONFIG_DEFINES="${CONFIG_DEFINES} -DHAVE_CRTN_MBX=ON"
@@ -139,14 +235,37 @@ do
             exit 1
        fi;;
     B) BUILD_IT=1;;
+    b) check_optional_arg ${OPTARG}
+       if [ $? -ne 0 ]
+       then echo Missing argument for option -${arg} >&2
+            help $0
+            exit 1
+       fi
+       check_build_dir ${OPTARG}
+       BUILD_DIR=${OPTARG};;
     I) INSTALL_IT=1;;
     U) UNINSTALL_IT=1;;
     A) ARCHIVE_IT=1;;
     T) TEST_IT=1;;
-    C) COV_IT=1;;
-    b) BROWSER=${OPTARG};;
+    C) COV_IT=1;
+       check_optional_arg ${OPTARG}
+       if [ $? -eq 0 ]
+       then BROWSER=${OPTARG}
+       else OPTIND=$((OPTIND - 1))
+       fi;;
+    X) check_optional_arg ${OPTARG}
+       if [ $? -ne 0 ]
+       then echo Missing argument for option -${arg} >&2
+            help $0
+            exit 1
+       fi
+       TOOLCHAIN=${OPTARG};;
     h) help $0
        exit 0;;
+    :) manage_optional_arg ${OPTARG};;
+    \?) echo Invalid option -${OPTARG} >&2
+        help $0
+        exit 1;;
     *) help $0
        exit 1;;
   esac
@@ -167,115 +286,43 @@ if [ ! -f `basename $0` ]
 then
   echo This script must be run in the source directory of CRTN >&2
   exit 1
+else
+  SRC_DIR=`pwd`
 fi
 
 # Make sure that we are running as root user for some options
-if [ -n "${CPACK_GENERATOR}" -o ${INSTALL_IT} -eq 1 -o ${UNINSTALL_IT} -eq 1 ]
+if [ ${INSTALL_IT} -eq 1 -o ${UNINSTALL_IT} -eq 1 ]
 then
+  uid=`id -u`
   if [ ${uid} -ne 0 ]
   then
-    echo "Those script options need super user rights (try at least sudo)" >&2
+    echo "At least one of the specified script option needs super user rights (try at least sudo)" >&2
     exit 1
   fi
 fi
 
+check_tool cmake
 
 if [ ${CLEANUP} -eq 1 ]
 then
-
-  echo Cleanup...
-
-  echo ">" Launching cmake cleanup
-  make clean > /dev/null 2>&1
-
-  echo ">" Deleting test coverage stuff
-  rm -rf all_coverage
-  find . -type f -name \*.gcda -exec rm -f {} \; -print
-  find . -type f -name \*.gcno -exec rm -f {} \; -print
-
-  echo ">" Deleting core files
-  find . -type f -name core -exec rm -f {} \; -print
-
-  echo ">" Deleting emacs backup files
-  find . -type f -name \*~ -exec rm -f {} \; -print
-
-  echo ">" Deleting CTEST files
-  find . -type f -name CTestTestfile.cmake -exec rm -f {} \; -print
-  rm -rf Testing
-
-  # Delete the packages
-  find . -type f \( -name \*.tgz -o -name \*.tar.gz -o -name \*.tar.Z -o -name \*.deb -o -name \*.rpm -o -name crtn-\*-Linux-\*.sh \) -exec rm -f {} \; -print
-
-  echo ">" Deleting packaging of cmake
-  rm -rf _CPack_Packages CPackConfig.cmake CPackSourceConfig.cmake
-
-  echo ">" Deleting the pkg-config files
-  find . -type f -name \*.pc -exec rm -f {} \; -print
-
-  echo ">" Deleting the files generated by cmake
-  rm -f CMakeCache.txt config.h install_manifest*.txt
-  find . -type f -name Makefile -exec rm -f {} \; -print
-  find . -type f -name cmake_install.cmake -exec rm -f {} \; -print
-  find . -type d -name CMakeFiles -exec rm -rf {} \; -print 2>/dev/null
-  find . -type f -name CMakeCache.txt -exec rm -f {} \; -print
-
-  echo ">" Deleting compressed mans
-  find . -type f \( -name crtn\*.gz \) -exec rm -f {} \; -print
-
-  # Delete the generated mans
-  rm -f man/crtn.3
-
-  # Delete various common objects
-  find . -type f -name a.out -exec rm -f {} \; -print
-  rm -f src/crtn
-  rm -f tests/check_all
-
-  echo ">" Deleting config files generated by cmake
-  find . -type f -name \*.in | while read file
-  do
-    base=${file%.in}; base=${base##*/}
-    dir=${file%/*}
-    if [ -f ${dir}/${base} ]
-    then
-      echo "   >" erasing ${dir}/${base}
-      rm -f ${dir}/${base}
-    fi
-  done
-
-fi
-
-# Make sure that cmake is installed if build or installation or 
-# packaging is requested
-if [ ${BUILD_IT} -eq 1 -o ${ARCHIVE_IT} -eq 1 -o ${INSTALL_IT} -eq 1 -o ${UNINSTALL_IT} -eq 1 -o ${TEST_IT} -eq 1 -o ${COV_IT} -eq 1 -o -n "${CPACK_GENERATOR}" ]
-then
-  which cmake > /dev/null 2>&1
-  if [ $? -ne 0 ]
-  then
-    echo To be able to compile/install CRTN, you must install cmake and/or update the PATH variable >&2
-    exit 1
-  fi
-
-  # Launch cmake
-  echo Configuring CRTN installation in ${INST_DIR}...
-  cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} .
+  clean_build
 fi
 
 # If archive is requested
 if [ ${ARCHIVE_IT} -eq 1 ]
 then
 
-  which tar > /dev/null 2>&1
-  if [ $? -ne 0 ]
-  then
-    echo "To be able to generate a CRTN archive, you must install 'tar' and/or update the PATH variable" >&2
-    exit 1
-  fi
+  check_tool tar
 
-  # Launch the build to get CRTN config file
-  make
+  # Launch the configuration to get CRTN config file
+  clean_build
+  create_build_dir
+  cd ${BUILD_DIR}
+  cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
+  cd -
 
   # Get CRTN's version
-  CRTN_VERSION=`cat config.h | grep -E "^#define CRTN_VERSION" | cut -d' ' -f3 | cut -d\" -f2`
+  CRTN_VERSION=`cat ${BUILD_DIR}/config.h | grep -E "^#define CRTN_VERSION" | cut -d' ' -f3 | cut -d\" -f2`
   if [ -z "${CRTN_VERSION}" ]
   then
     echo Unable to get the version of the software >&2
@@ -294,7 +341,7 @@ then
     exit 1
   fi
 
-  mkdir -p ${TMPDIR}/${ARCHIVE_DIR}
+  mkdir -p ${TMP_DIR}/${ARCHIVE_DIR}
 
   # Copy the files into the temporary directory
   cat ${FILE_LIST} | while read comment line
@@ -314,67 +361,114 @@ then
 
     if [ -n "${dir}" ]
     then
-      mkdir -p ${TMPDIR}/${ARCHIVE_DIR}/${dir}
+      mkdir -p ${TMP_DIR}/${ARCHIVE_DIR}/${dir}
     fi
 
-    cp ${comment} ${TMPDIR}/${ARCHIVE_DIR}/${dir}
+    cp ${comment} ${TMP_DIR}/${ARCHIVE_DIR}/${dir}
 
   done
 
-  echo Building archive ${ARCHIVE_NAME}...
-  tar cvfz ${ARCHIVE_NAME} -C ${TMPDIR} ${ARCHIVE_DIR} > /dev/null 2>&1
+  echo Building archive ${BUILD_DIR}/${ARCHIVE_NAME}...
+  tar cvfz ${BUILD_DIR}/${ARCHIVE_NAME} -C ${TMP_DIR} ${ARCHIVE_DIR} > /dev/null 2>&1
 
-  rm -rf ${TMPDIR}/${ARCHIVE_DIR}
+  rm -rf ${TMP_DIR}/${ARCHIVE_DIR}
 fi
 
 # If build is requested
 if [ ${BUILD_IT} -eq 1 ]
 then
+  clean_build
+  create_build_dir
+  cd ${BUILD_DIR}
+  cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
   make
+  cd -
+fi
+
+# If cross-build is requested
+if [ -n "${TOOLCHAIN}" ]
+then
+  clean_build
+  create_build_dir
+  cd ${BUILD_DIR}
+  if [ ! -f ${TOOLCHAIN} ]
+  then echo The toolchain file '${TOOLCHAIN}' is not accessible from '${BUILD_DIR}' directory >&2
+       exit 1
+  fi
+  cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
+  make
+  cd -
 fi
 
 # If installation is requested
 if [ ${INSTALL_IT} -eq 1 ]
 then
+
+  # Make the build directory
+  create_build_dir
+
+  cd ${BUILD_DIR}
+  cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
   make
   make install
+  cd -
 fi
 
 # If uninstallation is requested
 if [ ${UNINSTALL_IT} -eq 1 ]
 then
+  if [ ! -d ${BUILD_DIR} ]
+  then echo Build directory \(${BUILD_DIR}\) is not created, uninstallation not possible... >&2
+       exit 1
+  fi
+  cd ${BUILD_DIR}
   make uninstall
+  cd -
 fi
 
 # If test is requested
 if [ ${TEST_IT} -eq 1 ]
 then
+  clean_build
+  create_build_dir
+  cd ${BUILD_DIR}
+  cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
   make
   tests/check_all
+  cd -
 fi
 
 # If test coverage is requested
 if [ ${COV_IT} -eq 1 ]
 then
-  make clean
-  cmake ${CONFIG_DEFINES} -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug .
+  clean_build
+  create_build_dir
+  cd ${BUILD_DIR}
+  cmake ${CONFIG_DEFINES} -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug ${SRC_DIR}
   make
   make all_coverage
+  cd -
   if [ -n "${BROWSER}" ]
   then
-    ${BROWSER} ./all_coverage/index.html
+    ${BROWSER} ${BUILD_DIR}/all_coverage/index.html
   fi
 fi
 
 if [ -n "${CPACK_GENERATOR}" ]
 then
 
+  clean_build
+  create_build_dir
+
+  cd ${BUILD_DIR}
+
   # Configure CMAKE
-  cmake ${CONFIG_DEFINES} -DCPACK_GENERATOR=${CPACK_GENERATOR} -DCMAKE_INSTALL_PREFIX=${INST_DIR} .
+  cmake ${CONFIG_DEFINES} -DCPACK_GENERATOR=${CPACK_GENERATOR} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
 
   # Launch the build
-  make clean
   make
   make package
+
+  cd -
 
 fi

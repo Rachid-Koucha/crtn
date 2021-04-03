@@ -13,7 +13,7 @@ cmake_policy(SET CMP0048 NEW)
 #           PROJECT_DESCRIPTION, crtn_DESCRIPTION
 #           PROJECT_HOMEPAGE_URL, crtn_HOMEPAGE_URL
 PROJECT(crtn
-        VERSION 0.2.1
+        VERSION 0.2.2
         DESCRIPTION "CoRouTiNe API for C language"
         HOMEPAGE_URL "https://github.com/Rachid-Koucha/crtn"
         LANGUAGES C)
@@ -48,6 +48,18 @@ SET(CRTN_VERSION "${crtn_VERSION_MAJOR}.${crtn_VERSION_MINOR}.${crtn_VERSION_PAT
 #   DOCDIR           - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
 INCLUDE(GNUInstallDirs)
 
+#
+# Forbid builds in the source tree
+#
+IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+
+    MESSAGE(FATAL_ERROR "###########################################################################\n"
+                        "You are attempting to build in the source directory.\n"
+                        "Run cmake from an alternate build directory to avoid source tree pollution.\n"
+                        "###########################################################################")
+
+ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+
 MESSAGE(STATUS "Configuring CRTN version ${CRTN_VERSION}")
 
 # Size of the coroutine name
@@ -63,13 +75,14 @@ CONFIGURE_FILE(config.h.cmake config.h)
 SET(VERSION ${CRTN_VERSION})
 CONFIGURE_FILE(README.md.in README.md @ONLY)
 
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 ADD_DEFINITIONS(-g -O2 -fsigned-char -freg-struct-return -Wall -W -Wshadow -Wstrict-prototypes -Wpointer-arith -Wcast-qual -Winline -Werror)
 
 
 if (CMAKE_COVERAGE)
 
-  include(CodeCoverage.cmake)
+  include(CodeCoverage)
 
   APPEND_COVERAGE_COMPILER_FLAGS()
 
@@ -154,7 +167,7 @@ SET(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 SET(CPACK_DEBIAN_PACKAGE_SECTION "devel")
 SET(CPACK_DEBIAN_CRTN_PACKAGE_NAME "${PKG_NAME}")
-SET(CPACK_DEBIAN_CRTN_PACKAGE_CONTROL_EXTRA ${CMAKE_SOURCE_DIR}/crtn.postinst)
+SET(CPACK_DEBIAN_CRTN_PACKAGE_CONTROL_EXTRA ${CMAKE_BINARY_DIR}/crtn.postinst)
 
 #
 # CRTN RPM package
@@ -165,7 +178,7 @@ SET(CPACK_RPM_FILE_NAME "RPM-DEFAULT")
 SET(CPACK_RPM_PACKAGE_URL ${CRTN_HOME_PAGE})
 SET(CPACK_RPM_CRTN_PACKAGE_SUMMARY "${PKG_SUMMARY}")
 SET(CPACK_RPM_PACKAGE_LICENSE "GPL/LGPL")
-SET(CPACK_RPM_CRTN_POST_INSTALL_SCRIPT_FILE ${CMAKE_SOURCE_DIR}/crtn.postinst)
+SET(CPACK_RPM_CRTN_POST_INSTALL_SCRIPT_FILE ${CMAKE_BINARY_DIR}/crtn.postinst)
 
 
 #
@@ -203,7 +216,9 @@ ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(lib)
 ADD_SUBDIRECTORY(man)
 
-INCLUDE (FindCheck.cmake)
+IF (NOT CMAKE_CROSSCOMPILING)
+  INCLUDE(FindCheck)
+ENDIF (NOT CMAKE_CROSSCOMPILING)
 
 if (CHECK_FOUND)
 
