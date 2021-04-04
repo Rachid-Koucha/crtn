@@ -51,7 +51,8 @@ To report a bug or design enhancement, please contact [Rachid Koucha](mailto:rac
 
 ## <a name="3_Download"></a>3 Download
 
-The source code is available on github. Use the following command to clone it:
+The source code is available on [github](https://github.com/Rachid-Koucha/crtn).
+To clone it:
 ```
 $ git clone https://github.com/Rachid-Koucha/crtn.git
 ```
@@ -248,7 +249,7 @@ CPack: - package: .../crtn/crtn-@VERSION@-Linux-crtn.sh generated.
 To cross-compile with `cmake`, a toolchain file is required. Some examples are provided in the source tree
 in _cmake/toolchains_.
 
-To trigger the cross-build of the library for a Raspberry Pi card (32-bits ARM processor):
+For an ARM 32 bits build when **crossbuild-essential-armhf** is installed::
 ```
 $ make clean
 $ rm CMakeCache.txt
@@ -263,6 +264,23 @@ $ make
 [...]
 $ file lib/libcrtn.so.@VERSION@
 lib/libcrtn.so.@VERSION@: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
+```
+For an ARM 64 bits build when **crossbuild-essential-arm64** is installed:
+```
+$ make clean
+$ rm CMakeCache.txt
+$ cmake -DCMAKE_TOOLCHAIN_FILE=$HOME/crtn/cmake/toolchains/aarch64-linux-gnu.cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON $HOME/crtn
+-- The C compiler identification is GNU 9.3.0
+-- Check for working C compiler: /usr/bin/aarch64-linux-gnu-gcc
+-- Check for working C compiler: /usr/bin/aarch64-linux-gnu-gcc -- works
+[...]
+$ make
+Scanning dependencies of target crtn
+[  1%] Building C object lib/CMakeFiles/crtn.dir/crtn.c.o
+[  3%] Building C object lib/CMakeFiles/crtn.dir/crtn_mbx.c.o
+[...]
+$ file lib/libcrtn.so.@VERSION@
+lib/libcrtn.so.@VERSION@: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=6a60c0908cb8f4b94827418dbfa17eebf556b9fa, with debug_info, not stripped
 ```
 
 ## <a name="5_Adm_script"></a>5 Administration with crtn_install.sh
@@ -401,6 +419,8 @@ This makes the following binary packages in the _build_ sub-directory:
 
 To cross-compile with `cmake`, a toolchain file is required. Some examples are provided in the source tree
 in _cmake/toolchains_.
+
+For an ARM 32 bits build when **crossbuild-essential-armhf** is installed:
 ```
 $ ./crtn_install.sh -X $HOME/crtn/cmake/toolchains/arm-linux-gnueabihf.cmake -o sem -o mbx
 -- The C compiler identification is GNU 9.3.0
@@ -410,6 +430,19 @@ $ ./crtn_install.sh -X $HOME/crtn/cmake/toolchains/arm-linux-gnueabihf.cmake -o 
 $ file build/lib/libcrtn.so.@VERSION@
 lib/libcrtn.so.@VERSION@: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
 ```
+
+For an ARM 64 bits build when **crossbuild-essential-arm64** is installed:
+```
+$ ./crtn_install.sh -X $HOME/crtn/cmake/toolchains/arch64-linux-gnu.cmake -o sem -o mbx
+Removing 'build' directory
+-- The C compiler identification is GNU 9.3.0
+-- Check for working C compiler: /usr/bin/aarch64-linux-gnu-gcc
+-- Check for working C compiler: /usr/bin/aarch64-linux-gnu-gcc -- works
+[...]
+$ file build/lib/libcrtn.so.@VERSION@
+lib/libcrtn.so.@VERSION@: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=6a60c0908cb8f4b94827418dbfa17eebf556b9fa, with debug_info, not stripped
+```
+
 
 ## <a name="6_Usage"></a>6 Usage
 
