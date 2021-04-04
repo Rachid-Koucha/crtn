@@ -33,9 +33,9 @@
 
 ## <a name="1_Introduction"></a>1 Introduction
 
-CoRouTiNe (`crtn`) is an API providing [coroutines](https://en.wikipedia.org/wiki/Coroutine) in C language programs.
-They are concurrent execution flows that can be suspended or resumed under the control of the user.
-The underlying operating system has no idea of their existence.
+CoRouTiNe (`crtn`) is an API providing [coroutines](https://en.wikipedia.org/wiki/Coroutine)
+in C language programs. They are concurrent execution flows that can be suspended or resumed
+under the control of the user. The underlying operating system has no idea of their existence.
 
 The service is an abstraction layer implemented as a shared library on top of GLIBC:
 
@@ -45,12 +45,9 @@ The service is an abstraction layer implemented as a shared library on top of GL
 
 The current document concerns `crtn` version **@VERSION@**.
 
-
 ## <a name="2_Maintainers"></a>2 Maintainers
 
-
 To report a bug or design enhancement, please contact [Rachid Koucha](mailto:rachid.koucha@gmail.com)
-
 
 ## <a name="3_Download"></a>3 Download
 
@@ -70,18 +67,28 @@ The source tree is:
 
 ## <a name="4_Adm_cmake"></a>4 Administration with cmake
 
+In the following paragraphs, we suppose that the the source code tree is located in _$HOME/crtn_.
+
+To avoid the pollution of the source code tree with generated objects, it is preferable to make
+an out of source configuration and build. So, we create a build directory. For example, _/tmp/crtn_build_:
+```
+$ mkdir /tmp/crtn_build
+$ cd /tmp/crtn_build
+```
+
 ### <a name="4_1_Cfg"></a>4.1 Configuration
 
-To configure the package, it is mandatory to create a separate build directory to avoid the pollution of the source code tree with generated objects.
+To configure the build:
 
-For example, here we create a sub-directory called _build_ at the top level of the source tree. Then, `cmake` is called and it is passed the pathname of the source tree:
 ```
-$ mkdir build
-$ cd build
-$ cmake ..
--- Configuring CRTN version @VERSION@
-The user id is 1000
+$ ls
+$ cmake $HOME/crtn
 [...]
+-- Configuring CRTN version @VERSION@
+[...]
+-- Build files have been written to: /tmp/crtn_build
+$ ls
+CMakeCache.txt  CMakeFiles  CPackConfig.cmake [...]
 ```
 
 Some optional services can be set by cmake variables:
@@ -97,10 +104,10 @@ HAVE_CRTN_SEM:BOOL=OFF
 
 To configure the package with the optional mailbox and semaphore services:
 ```
-$ cmake .. -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON
+$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON $HOME/crtn
 -- Configuring CRTN version @VERSION@
-The user id is 1000
 [...]
+-- Build files have been written to: /tmp/crtn_build
 $ cmake -LH
 [...]
 // Mailbox service
@@ -112,75 +119,85 @@ HAVE_CRTN_SEM:BOOL=ON
 
 ### <a name="4_2_Build"></a>4.2 Build
 
-The build is launched from the _build_ directory previously created and configured:
+To build the software:
 ```
 $ make
 [  1%] Building C object lib/CMakeFiles/crtn.dir/crtn.c.o
 [  3%] Building C object lib/CMakeFiles/crtn.dir/crtn_mbx.c.o
 [...]
+$ ls lib
+[...]libcrtn.so  libcrtn.so.0  libcrtn.so.0.2.2
 ```
 
 To clean the built files:
 ```
 $ make clean
+$ ls lib
+CMakeFiles  Makefile  cmake_install.cmake
 ```
 
 ### <a name="4_3_Installation"></a>4.3 Installation
 
-To install the software:
+To install the software in the default _@CMAKE_INSTALL_PREFIX@_ directory:
 ```
 $ sudo make install
-```
-By default, the library and the manuals are installed under _/usr/local_:
-```
-$ ls -l /usr/local/lib/libcrtn.so*
-lrwxrwxrwx 1 root root    12 mars   21 12:04 /usr/local/lib/libcrtn.so -> libcrtn.so.@PROJECT_VERSION_MAJOR@
-lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.@PROJECT_VERSION_MAJOR@ -> libcrtn.so.@VERSION@
--r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.@VERSION@
+$ ls -l @CMAKE_INSTALL_PREFIX@/lib/libcrtn.so*
+lrwxrwxrwx 1 root root    12 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/lib/libcrtn.so -> libcrtn.so.@PROJECT_VERSION_MAJOR@
+lrwxrwxrwx 1 root root    16 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/lib/libcrtn.so.@PROJECT_VERSION_MAJOR@ -> libcrtn.so.@VERSION@
+-r--r--r-- 1 root root 60040 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/lib/libcrtn.so.@VERSION@
 $ ls -l /usr/local/share/man/man3/crtn*
--r--r--r-- 1 root root 2786 mars   21 12:04 /usr/local/share/man/man3/crtn.3.gz
--r--r--r-- 1 root root   55 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_delete.3.gz
--r--r--r-- 1 root root   52 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_new.3.gz
--r--r--r-- 1 root root   50 mars   21 12:04 /usr/local/share/man/man3/crtn_cancel.3.gz
+-r--r--r-- 1 root root 2786 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn.3.gz
+-r--r--r-- 1 root root   55 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn_attr_delete.3.gz
+-r--r--r-- 1 root root   52 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn_attr_new.3.gz
+-r--r--r-- 1 root root   50 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn_cancel.3.gz
 [...]
 $ ls -l /usr/local/share/man/man7/crtn*
--r--r--r-- 1 root root 1436 mars   21 12:04 /usr/local/share/man/man7/crtn.7.gz
+-r--r--r-- 1 root root 1436 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man7/crtn.7.gz
 ```
 To uninstall the software:
 ```
 $ sudo make uninstall
+$ ls -l /usr/local/share/man/man3/crtn*
+ls: cannot access '@CMAKE_INSTALL_PREFIX@/share/man/man3/crtn*': No such file or directory
 ```
 
 ### <a name="4_4_Tests"></a>4.4 Tests
 
 To launch the regression tests, [check](https://libcheck.github.io/check/) package must be available on the system.
 
-The tests can be triggered through cmake's _test_ target from the _build_ directory:
+The tests can be triggered through cmake's _test_ target:
 ```
 $ make test
 Running tests...
-Test project .../DEVS/GIT_BASE/crtn
+Test project /tmp/crtn_build
     Start 1: crtn_tests
-[...]
+1/1 Test #1: crtn_tests .......................   Passed   22.03 sec
+
 100% tests passed, 0 tests failed out of 1
 
-Total Test time (real) =  20.03 sec
+Total Test time (real) =  22.03 sec
 ```
-The logs are located in _Testing_ sub-directory.
-
-The tests can be triggered by calling directly the executable in _tests_ sub-directory:
+The logs are located in _Testing_ sub-directory:
+```
+$ ls Testing
+Temporary
+$ ls Testing/Temporary
+CTestCostData.txt  LastTest.log
+```
+The tests can also be triggered by calling directly the executable in _tests_ sub-directory:
 ```
 $ tests/check_all
 Running suite(s): CRTN tests
-100%: Checks: 31, Failures: 0, Errors: 0
+[...]
+100%: Checks: 32, Failures: 0, Errors: 0
 ```
 
 ### <a name="4_5_Tests_coverage"></a>4.5 Tests coverage measurement
 
-The tests coverage with the semaphore/mailbox optional services can be done from the _build_ directory. The last parameter passed to `cmake` is the pathname of the source tree. Here it is "..":
+To triggered the tests coverage measurement with the semaphore/mailbox optional services:
 ```
 $ make clean
-$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug ..
+$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug $HOME/crtn
 -- Configuring CRTN version @VERSION@
 CMAKE_C_COMPILER_ID=GNU
 -- Appending code coverage compiler flags: -g -O0 --coverage -fprofile-arcs -ftest-coverage
@@ -202,27 +219,28 @@ Overall coverage rate:
 Open .../all_coverage/index.html in your browser to view the coverage report.
 [100%] Built target all_coverage
 ```
-The resulting _./all_coverage/index.html_ file can be viewed in a browser to get something like this:
+The resulting _/tmp/crtn_build/all_coverage/index.html_ file can be viewed in a browser to get something like this:
 
 <p align="center"><img src="doc/crtn_coverage.png"></p>
 
 
 ### <a name="4_6_Packaging"></a>4.6 Packaging
 
-The generation of the DEB, RPM, TGZ and STGZ packages with the semaphore/mailbox optional services is done from the _build_ directory. The last parameter passed to `cmake` is the pathname of the source tree. Here it is "..":
+To generate the DEB, RPM, TGZ and STGZ packages with the semaphore/mailbox optional services:
+
 ```
 $ make clean
-$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCPACK_GENERATOR="DEB;RPM;TGZ;STGZ" -DCMAKE_INSTALL_PREFIX=/usr/local ..
+$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCPACK_GENERATOR="DEB;RPM;TGZ;STGZ" -DCMAKE_INSTALL_PREFIX=@CMAKE_INSTALL_PREFIX@ $HOME/crtn
 $ make
 $ make package
 [...]
-CPack: - package: .../crtn/crtn_0.2.1_amd64.deb generated.
+CPack: - package: .../crtn/crtn_@VERSION@_amd64.deb generated.
 [...]
-Pack: - package: .../crtn/crtn-0.2.1-1.x86_64.rpm generated.
+Pack: - package: .../crtn/crtn-@VERSION@-1.x86_64.rpm generated.
 [...]
-CPack: - package: .../crtn/crtn-0.2.1-Linux-crtn.tar.gz generated.
+CPack: - package: .../crtn/crtn-@VERSION@-Linux-crtn.tar.gz generated.
 [...]
-CPack: - package: .../crtn/crtn-0.2.1-Linux-crtn.sh generated.
+CPack: - package: .../crtn/crtn-@VERSION@-Linux-crtn.sh generated.
 ```
 
 ### <a name="4_7_Cross_compiling"></a>4.7 Cross-compiling
@@ -230,17 +248,19 @@ CPack: - package: .../crtn/crtn-0.2.1-Linux-crtn.sh generated.
 To cross-compile with `cmake`, a toolchain file is required. Some examples are provided in the source tree
 in _cmake/toolchains_.
 
-If the source code is installed in _$HOME/crtn_, the cross-build of the library for a Raspberry Pi card
-(32-bits ARM processor) in the _/tmp/crtn_ directory is done as follow:
+To trigger the cross-build of the library for a Raspberry Pi card (32-bits ARM processor):
 ```
-$ mkdir build
-$ cd build
-$ cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/arm-linux-gnueabihf.cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON ..
+$ make clean
+$ rm CMakeCache.txt
+$ cmake -DCMAKE_TOOLCHAIN_FILE=$HOME/crtn/cmake/toolchains/arm-linux-gnueabihf.cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON $HOME/crtn
 -- The C compiler identification is GNU 9.3.0
 -- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc
 -- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc -- works
 [...]
 $ make
+[  1%] Building C object lib/CMakeFiles/crtn.dir/crtn.c.o
+[  3%] Building C object lib/CMakeFiles/crtn.dir/crtn_mbx.c.o
+[...]
 $ file lib/libcrtn.so.@VERSION@
 lib/libcrtn.so.@VERSION@: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
 ```
@@ -250,9 +270,10 @@ lib/libcrtn.so.@VERSION@: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SY
 
 ### <a name="5_1_crtn_install_sh_scritpt"></a>5.1 crtn_install.sh script
 
+This shell script is a swiss army knife to make several things. It implicitly uses `cmake`.
+The tool is to be used from the top level of the source tree.
 
-This shell script is a swiss army knife to make several things. It implicitly uses `cmake`. To display the help, use the `-h` option:
-
+To display the help, use the `-h` option:
 ```
 $ ./crtn_install.sh -h
 
@@ -280,49 +301,58 @@ Usage:
 
 Note that some options require super user privileges. Use `sudo` for example.
 
+In the following paragraphs, we suppose that the the source code tree is located in _$HOME/crtn_.
+
+To avoid the pollution of the source code tree with generated objects, it is preferable to make
+an out of source configuration and build. The build directory is specified with the `-b` option.
+By default, a sub-directory called _build_ is created by the tool at the top level of the source tree.
 
 ### <a name="5_2_Build_installation_cleanup"></a>5.2 Build, installation, cleanup
 
-The script creates a sub-directory called _build_ at the top level of the source tree and into which all the generated files are stored. 
-
 To clean everything, go to the top level of the source tree:
-`$ ./crtn_install.sh -c`
-
+````
+$ ./crtn_install.sh -c
+```
 To build the library:
-
-`$ ./crtn_install.sh -B`
-
-If mailbox and/or semaphores are required, add the corresponding option on the command line:
-
-`$ ./crtn_install.sh -B -o mbx -o sem`
+```
+$ ./crtn_install.sh -B
+$ ls build
+[...]include  lib  man  tests
+$ ls build/lib
+[...]libcrtn.so  libcrtn.so.0  libcrtn.so.@VERSION@
+```
+If mailbox and/or semaphores services are required, add the corresponding options on the command line:
+```
+$ ./crtn_install.sh -B -o mbx -o sem
+```
 
 For a complete installation in the default _@CMAKE_INSTALL_PREFIX@_ subtree (super user rights required):
-
-`$ sudo ./crtn_install.sh -I`
-
-By default, the library and the manuals are installed under _/usr/local_:
 ```
-$ ls -l /usr/local/lib/libcrtn.so*
-lrwxrwxrwx 1 root root    12 mars   21 12:04 /usr/local/lib/libcrtn.so -> libcrtn.so.@PROJECT_VERSION_MAJOR@
-lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.@PROJECT_VERSION_MAJOR@ -> libcrtn.so.@VERSION@
--r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.@VERSION@
-$ ls -l /usr/local/share/man/man3/crtn*
--r--r--r-- 1 root root 2786 mars   21 12:04 /usr/local/share/man/man3/crtn.3.gz
--r--r--r-- 1 root root   55 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_delete.3.gz
--r--r--r-- 1 root root   52 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_new.3.gz
--r--r--r-- 1 root root   50 mars   21 12:04 /usr/local/share/man/man3/crtn_cancel.3.gz
+$ sudo ./crtn_install.sh -I
+$ ls -l @CMAKE_INSTALL_PREFIX@/lib/libcrtn.so*
+lrwxrwxrwx 1 root root    12 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/lib/libcrtn.so -> libcrtn.so.@PROJECT_VERSION_MAJOR@
+lrwxrwxrwx 1 root root    16 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/lib/libcrtn.so.@PROJECT_VERSION_MAJOR@ -> libcrtn.so.@VERSION@
+-r--r--r-- 1 root root 60040 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/lib/libcrtn.so.@VERSION@
+$ ls -l @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn*
+-r--r--r-- 1 root root 2786 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn.3.gz
+-r--r--r-- 1 root root   55 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn_attr_delete.3.gz
+-r--r--r-- 1 root root   52 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn_attr_new.3.gz
+-r--r--r-- 1 root root   50 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man3/crtn_cancel.3.gz
 [...]
-$ ls -l /usr/local/share/man/man7/crtn*
--r--r--r-- 1 root root 1436 mars   21 12:04 /usr/local/share/man/man7/crtn.7.gz
+$ ls -l @CMAKE_INSTALL_PREFIX@/share/man/man7/crtn*
+-r--r--r-- 1 root root 1436 mars   21 12:04 @CMAKE_INSTALL_PREFIX@/share/man/man7/crtn.7.gz
 ```
 To uninstall the software (super user rights required):
-
-`$ sudo ./crtn_install.sh -U`
-
+```
+$ sudo ./crtn_install.sh -U
+$ ls -l @CMAKE_INSTALL_PREFIX@/share/man/man7/crtn*
+ls: cannot access '@CMAKE_INSTALL_PREFIX@/share/man/man7/crtn*': No such file or directory
+```
 To cleanup every generated files to go back to original source tree:
-
-`$ ./crtn_install.sh -c`
-
+```
+$ ./crtn_install.sh -c
+Removing 'build' directory
+```
 
 ### <a name="5_3_Tests"></a>5.3 Tests
 
@@ -333,7 +363,7 @@ To trigger the regression tests for the whole software (i.e. with the optional m
 ```
 $ ./crtn_install.sh -T -o mbx -o sem
 [...]
-100%: Checks: 31, Failures: 0, Errors: 0
+100%: Checks: 32, Failures: 0, Errors: 0
 ```
 
 ### <a name="5_4_Tests_coverage_measurement"></a>5.4 Tests coverage measurement
@@ -341,9 +371,9 @@ $ ./crtn_install.sh -T -o mbx -o sem
 The test coverage measurement requires the `gcov/lcov` packages.
 
 To trigger test coverage measurement for `crtn` (with a display of the result in firefox):
-
-`$ ./crtn_install.sh -C firefox`
-
+```
+$ ./crtn_install.sh -C firefox
+```
 This shows something like this in the browser:
 
 <p align="center"><img src="doc/crtn_coverage.png"></p>
@@ -351,18 +381,16 @@ This shows something like this in the browser:
 ### <a name="5_5_Packaging"></a>5.5 Packaging
 
 To make a tar gzip source package, use the `-A` option of `crtn_install.sh`:
-
-`$ ./crtn_install.sh -A`
-
-This makes a `tgz` file of the complete source tree: _build/crtn_src-@VERSION@.tgz_
-
-
-It is also possible to generate Debian (_deb_), Red-Hat Package Manager (_rpm_), Tar GZipped (_tgz_) and Self Extracting Tar GZipped (_stgz_) binary packages.
-
-To build the packages _tgz_, _deb_, _rpm_...:
-
-`$ ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz`
-
+```
+$ ./crtn_install.sh -A
+[...]
+Building archive build/crtn_src-@VERSION@.tgz...
+```
+It is also possible to generate Debian (_deb_), Red-Hat Package Manager (_rpm_), Tar GZipped (_tgz_)
+and Self Extracting Tar GZipped (_stgz_) binary packages:
+```
+$ ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz
+```
 This makes the following binary packages in the _build_ sub-directory:
 * _@CMAKE_PROJECT_NAME@_@VERSION@_amd64.deb (deb)_
 * _@CMAKE_PROJECT_NAME@-@VERSION@-1.x86_64.rpm (rpm)_
@@ -373,15 +401,15 @@ This makes the following binary packages in the _build_ sub-directory:
 
 To cross-compile with `cmake`, a toolchain file is required. Some examples are provided in the source tree
 in _cmake/toolchains_.
-
-If the source code is installed in _$HOME/crtn_, the cross-build of the library for a Raspberry Pi card
-(32-bits ARM processor) in the _/tmp/crtn_ directory is done as follow:
 ```
-$ ./crtn_install.sh -b /tmp/crtn -X $HOME/crtn/cmake/toolchains/arm-linux-gnueabihf.cmake -o sem -o mbx
-$ file /tmp/crtn/lib/libcrtn.so.@VERSION@
+$ ./crtn_install.sh -X $HOME/crtn/cmake/toolchains/arm-linux-gnueabihf.cmake -o sem -o mbx
+-- The C compiler identification is GNU 9.3.0
+-- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc
+-- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc -- works
+[...]
+$ file build/lib/libcrtn.so.@VERSION@
 lib/libcrtn.so.@VERSION@: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
 ```
-
 
 ## <a name="6_Usage"></a>6 Usage
 

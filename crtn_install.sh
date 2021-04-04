@@ -112,7 +112,6 @@ manage_optional_arg()
   case $1 in
     C) COV_IT=1;;
     *) echo Missing argument for option -$1 >&2
-       help $0
        exit 1;;
   esac
 
@@ -120,15 +119,22 @@ manage_optional_arg()
 
 check_optional_arg()
 {
-  ARG=$1
+  OPT=$1
+  ARG=$2
+  END=$3
 
-  if [ ${ARG:0:1} = "-" ]
+  # Check if the argument appears to be an option
+  if [ ${#ARG} -eq 2 -a ${ARG:0:1} = "-" ]
   then
+     if [ $END -eq 1 ]
+     then
+       echo Missing argument for option -${OPT} >&2
+       exit 1
+     fi
      return 1
-  else
-     return 0
   fi
 
+  return 0
 }
 
 clean_build()
@@ -171,24 +177,14 @@ create_build_dir()
 
 
 # Parse the command line
-while getopts ${OPTSTRING} arg
+while getopts ${OPTSTRING} opt
 do
-  case ${arg} in
+  case ${opt} in
     c) CLEANUP=1;;
-    d) check_optional_arg ${OPTARG}
-       if [ $? -ne 0 ]
-       then echo Missing argument for option -${arg} >&2
-            help $0
-            exit 1
-       fi
+    d) check_optional_arg $opt ${OPTARG} 1
        INST_DIR=${OPTARG};;
     P) OPTARG=`echo ${OPTARG} | tr [:lower:] [:upper:]`
-       check_optional_arg ${OPTARG}
-       if [ $? -ne 0 ]
-       then echo Missing argument for option -${arg} >&2
-            help $0
-            exit 1
-       fi
+       check_optional_arg $opt ${OPTARG} 1
        if [ ${OPTARG} = "DEB" ]
        then if [ -n "${CPACK_GENERATOR}" ]
             then CPACK_GENERATOR="${CPACK_GENERATOR};DEB"
@@ -210,16 +206,10 @@ do
             else CPACK_GENERATOR=STGZ
             fi
        else echo Unknown package type \'${OPTARG}\' >&2
-            help $0
             exit 1
        fi;;
     o) OPTARG=`echo ${OPTARG} | tr [:lower:] [:upper:]`
-       check_optional_arg ${OPTARG}
-       if [ $? -ne 0 ]
-       then echo Missing argument for option -${arg} >&2
-            help $0
-            exit 1
-       fi
+       check_optional_arg $opt ${OPTARG} 1
        if [ ${OPTARG} = "MBX" ]
        then if [ -n "${CONFIG_DEFINES}" ]
             then CONFIG_DEFINES="${CONFIG_DEFINES} -DHAVE_CRTN_MBX=ON"
@@ -231,16 +221,10 @@ do
             else CONFIG_DEFINES="-DHAVE_CRTN_SEM=ON"
             fi
        else echo Unknown service \'${OPTARG}\' >&2
-            help $0
             exit 1
        fi;;
     B) BUILD_IT=1;;
-    b) check_optional_arg ${OPTARG}
-       if [ $? -ne 0 ]
-       then echo Missing argument for option -${arg} >&2
-            help $0
-            exit 1
-       fi
+    b) check_optional_arg $opt ${OPTARG} 1
        check_build_dir ${OPTARG}
        BUILD_DIR=${OPTARG};;
     I) INSTALL_IT=1;;
@@ -248,23 +232,17 @@ do
     A) ARCHIVE_IT=1;;
     T) TEST_IT=1;;
     C) COV_IT=1;
-       check_optional_arg ${OPTARG}
+       check_optional_arg $opt ${OPTARG} 0
        if [ $? -eq 0 ]
        then BROWSER=${OPTARG}
        else OPTIND=$((OPTIND - 1))
        fi;;
-    X) check_optional_arg ${OPTARG}
-       if [ $? -ne 0 ]
-       then echo Missing argument for option -${arg} >&2
-            help $0
-            exit 1
-       fi
+    X) check_optional_arg ${OPTARG} ${OPTARG} 1
        TOOLCHAIN=${OPTARG};;
     h) help $0
        exit 0;;
     :) manage_optional_arg ${OPTARG};;
     \?) echo Invalid option -${OPTARG} >&2
-        help $0
         exit 1;;
     *) help $0
        exit 1;;
@@ -277,7 +255,6 @@ shift $((${OPTIND} - 1))
 if [ -n "$1" ]
 then
   echo Too many arguments >&2
-  help $0
   exit 1
 fi
 
