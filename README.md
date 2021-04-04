@@ -310,7 +310,7 @@ By default, a sub-directory called _build_ is created by the tool at the top lev
 ### <a name="5_2_Build_installation_cleanup"></a>5.2 Build, installation, cleanup
 
 To clean everything, go to the top level of the source tree:
-````
+```
 $ ./crtn_install.sh -c
 ```
 To build the library:
