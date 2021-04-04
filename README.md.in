@@ -8,14 +8,14 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[4.2 Build](#4_2_Build)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.3 Installation](#4_3_Installation)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.4 Tests](#4_4_Tests)  
-&nbsp;&nbsp;&nbsp;&nbsp;[4.5 Tests coverage measurement](#4_5_Tests_coverage)  
+&nbsp;&nbsp;&nbsp;&nbsp;[4.5 Tests coverage](#4_5_Tests_coverage)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.6 Packaging](#4_6_Packaging)  
 &nbsp;&nbsp;&nbsp;&nbsp;[4.7 Cross-compiling](#4_7_Cross_compiling)  
 [5 Administration with crtn_install.sh](#5_Adm_script)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.1 crtn_install.sh script](#5_1_crtn_install_sh_scritpt)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.2 Build, installation, cleanup](#5_2_Build_installation_cleanup)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.3 Tests](#5_3_Tests)  
-&nbsp;&nbsp;&nbsp;&nbsp;[5.4 Tests coverage measurement](#5_4_Tests_coverage_measurement)  
+&nbsp;&nbsp;&nbsp;&nbsp;[5.4 Tests coverage](#5_4_Tests_coverage)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.5 Packaging](#5_5_Packaging)  
 &nbsp;&nbsp;&nbsp;&nbsp;[5.6 Cross-compiling](#5_6_Cross_compiling)  
 [6 Usage](#6_Usage)  
@@ -68,10 +68,12 @@ The source tree is:
 
 ## <a name="4_Adm_cmake"></a>4 Administration with cmake
 
-In the following paragraphs, we suppose that the the source code tree is located in _$HOME/crtn_.
+In the following paragraphs, we suppose that the source code tree is located in _$HOME/crtn_.
 
-To avoid the pollution of the source code tree with generated objects, it is preferable to make
-an out of source configuration and build. So, we create a build directory. For example, _/tmp/crtn_build_:
+To avoid the pollution of the source code tree with generated objects, it is
+preferable to make an out of source configuration and build. So, we create a
+build directory from which all the configuration/build operations will be done.
+In the the following sections, we use _/tmp/crtn_build_:
 ```
 $ mkdir /tmp/crtn_build
 $ cd /tmp/crtn_build
@@ -193,9 +195,9 @@ Running suite(s): CRTN tests
 100%: Checks: 32, Failures: 0, Errors: 0
 ```
 
-### <a name="4_5_Tests_coverage"></a>4.5 Tests coverage measurement
+### <a name="4_5_Tests_coverage"></a>4.5 Tests coverage
 
-To triggered the tests coverage measurement with the semaphore/mailbox optional services:
+To measure the tests coverage, the `gcov/lcov` packages are required. For example, the test coverage with the semaphore/mailbox optional services:
 ```
 $ make clean
 $ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug $HOME/crtn
@@ -246,8 +248,8 @@ CPack: - package: .../crtn/crtn-@VERSION@-Linux-crtn.sh generated.
 
 ### <a name="4_7_Cross_compiling"></a>4.7 Cross-compiling
 
-To cross-compile with `cmake`, a toolchain file is required. Some examples are provided in the source tree
-in _cmake/toolchains_.
+To cross-compile with `cmake`, a toolchain file is required. Some examples are
+provided in _cmake/toolchains_ from the top level of the source tree.
 
 For an ARM 32 bits build when **crossbuild-essential-armhf** is installed::
 ```
@@ -301,7 +303,7 @@ Usage:
                   [-B] [-A] [-P RPM|DEB|TGZ|STGZ] [-b build_dir] [-X toolchain] [-h]
 
     -c    : Cleanup built objects
-    -C [browser]: Launch test the coverage measurement (results are displayed with 'browser')
+    -C [browser]: Measure the test coverage (results are displayed with 'browser')
     -T    : Launch the regression tests
     -d    : Installation directory (default: /usr/local)
     -P RPM|DEB|TGZ|STGZ: Generate packages
@@ -319,7 +321,7 @@ Usage:
 
 Note that some options require super user privileges. Use `sudo` for example.
 
-In the following paragraphs, we suppose that the the source code tree is located in _$HOME/crtn_.
+In the following paragraphs, we suppose that the source code tree is located in _$HOME/crtn_.
 
 To avoid the pollution of the source code tree with generated objects, it is preferable to make
 an out of source configuration and build. The build directory is specified with the `-b` option.
@@ -384,13 +386,17 @@ $ ./crtn_install.sh -T -o mbx -o sem
 100%: Checks: 32, Failures: 0, Errors: 0
 ```
 
-### <a name="5_4_Tests_coverage_measurement"></a>5.4 Tests coverage measurement
+### <a name="5_4_Tests_coverage"></a>5.4 Tests coverage
 
-The test coverage measurement requires the `gcov/lcov` packages.
+To measure the test coverage, the `gcov/lcov` packages are required.
 
-To trigger test coverage measurement for `crtn` (with a display of the result in firefox):
+The test coverage of `crtn` with a display of the result in firefox:
 ```
 $ ./crtn_install.sh -C firefox
+```
+The same with the semaphore/mailbox optional services:
+```
+$ ./crtn_install.sh -C firefox -o mbx -o sem
 ```
 This shows something like this in the browser:
 
@@ -417,8 +423,8 @@ This makes the following binary packages in the _build_ sub-directory:
 
 ### <a name="5_6_Cross_compiling"></a>5.6 Cross-compiling
 
-To cross-compile with `cmake`, a toolchain file is required. Some examples are provided in the source tree
-in _cmake/toolchains_.
+To cross-compile with `cmake`, a toolchain file is required. Some examples are
+provided in _cmake/toolchains_ from the top level of the source tree.
 
 For an ARM 32 bits build when **crossbuild-essential-armhf** is installed:
 ```

@@ -65,7 +65,7 @@ TOOL_CHAINS=$(ls cmake/toolchains)
     echo "                  [-B] [-A] [-P ${PLIST}] [-b build_dir] [-X toolchain] [-h]"
     echo
     echo "    -c    : Cleanup built objects"
-    echo "    -C [browser]: Launch test the coverage measurement (results are displayed with 'browser')"
+    echo "    -C [browser]: Measure the test coverage (results are displayed with 'browser')"
     echo "    -T    : Launch the regression tests"
     echo "    -d    : Installation directory (default: ${INST_DIR})"
     echo "    -P ${PLIST}: Generate packages"
