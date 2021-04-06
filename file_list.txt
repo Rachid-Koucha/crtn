@@ -8,7 +8,7 @@
 
 ./CMakeLists.txt
 ./cmake_uninstall.cmake.in
-./config.h.cmake
+./config.h.in
 ./crtn.postinst.in
 ./crtn_install.sh
 ./file_list.txt

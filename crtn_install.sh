@@ -4,7 +4,6 @@
 #
 #  Copyright (C) 2021 Rachid Koucha <rachid dot koucha at gmail dot com>
 #
-#
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
@@ -24,6 +23,10 @@ SW_NAME=CRTN
 TMP_DIR="/tmp/crtn_$$"
 BUILD_DIR_DEFAULT="build"
 BUILD_DIR=${BUILD_DIR_DEFAULT}
+BUILD_DIR_TAG=.${SW_NAME}
+
+PLIST="RPM|DEB|TGZ|STGZ"
+OPTLIST="MBX|SEM"
 
 cleanup_exit()
 {
@@ -50,11 +53,16 @@ CPACK_GENERATOR=
 TOOLCHAIN=
 
 
+error_exit()
+{
+  echo $1 >&2
+  exit 1
+}
+
+
 # User manual
 help()
 {
-PLIST="RPM|DEB|TGZ|STGZ"
-OPTLIST="MBX|SEM"
 TOOL_CHAINS=$(ls cmake/toolchains)
 
   {
@@ -96,11 +104,7 @@ fi
 check_tool()
 {
   which $1 > /dev/null 2>&1
-  if [ $? -ne 0 ]
-  then
-    echo $1 tool is required \(is it installed or in the PATH variable?\) >&2
-    exit 1
-  fi
+  [ $? -ne 0 ] && error_exit "$1 tool is required (is it installed or in the PATH variable?)"
 }
 
 
@@ -111,8 +115,7 @@ manage_optional_arg()
   
   case $1 in
     C) COV_IT=1;;
-    *) echo Missing argument for option -$1 >&2
-       exit 1;;
+    *) error_exit "Missing argument for option -$1";;
   esac
 
 }
@@ -126,11 +129,7 @@ check_optional_arg()
   # Check if the argument appears to be an option
   if [ ${#ARG} -eq 2 -a ${ARG:0:1} = "-" ]
   then
-     if [ $END -eq 1 ]
-     then
-       echo Missing argument for option -${OPT} >&2
-       exit 1
-     fi
+     [ $END -eq 1 ] && error_exit "Missing argument for option -${OPT}"
      return 1
   fi
 
@@ -155,7 +154,7 @@ check_build_dir()
      files=`ls $1 | wc -l`
      if [ "$files" != "0" ]
      then
-       [ ! -f $1/.${SW_NAME} ] && echo "Directory '$1' does not seem to belong to ${SW_NAME}" >&2 && exit 1
+       [ ! -f $1/${BUILD_DIR_TAG} ] && error_exit "Directory '$1' exists and does not seem to belong to ${SW_NAME}"
      fi
   fi
 }
@@ -166,12 +165,9 @@ create_build_dir()
   if [ ! -d ${BUILD_DIR} ]
   then
       mkdir -p ${BUILD_DIR}
-      if [ $? -ne 0 ]
-      then 
-        echo Unable to create build directory \'${BUILD_DIR}\' >&2
-        exit 1
-      fi
-      > ${BUILD_DIR}/.${SW_NAME}
+      [ $? -ne 0 ] && error_exit "Unable to create build directory '${BUILD_DIR}'"
+      > ${BUILD_DIR}/${BUILD_DIR_TAG}
+      [ ! -f ${BUILD_DIR}/${BUILD_DIR_TAG} ] && error_exit "Unable to tag build directory '${BUILD_DIR}'"
   fi
 }
 
@@ -183,46 +179,32 @@ do
     c) CLEANUP=1;;
     d) check_optional_arg $opt ${OPTARG} 1
        INST_DIR=${OPTARG};;
-    P) OPTARG=`echo ${OPTARG} | tr [:lower:] [:upper:]`
+    P) OPTARG=${OPTARG^^}
        check_optional_arg $opt ${OPTARG} 1
-       if [ ${OPTARG} = "DEB" ]
-       then if [ -n "${CPACK_GENERATOR}" ]
-            then CPACK_GENERATOR="${CPACK_GENERATOR};DEB"
-            else CPACK_GENERATOR=DEB
-            fi
-       elif [ ${OPTARG} = "RPM" ]
-       then if [ -n "${CPACK_GENERATOR}" ]
-            then CPACK_GENERATOR="${CPACK_GENERATOR};RPM"
-            else CPACK_GENERATOR=RPM
-            fi
-       elif [ ${OPTARG} = "TGZ" ]
-       then if [ -n "${CPACK_GENERATOR}" ]
-            then CPACK_GENERATOR="${CPACK_GENERATOR};TGZ"
-            else CPACK_GENERATOR=TGZ
-            fi
-       elif [ ${OPTARG} = "STGZ" ]
-       then if [ -n "${CPACK_GENERATOR}" ]
-            then CPACK_GENERATOR="${CPACK_GENERATOR};STGZ"
-            else CPACK_GENERATOR=STGZ
-            fi
-       else echo Unknown package type \'${OPTARG}\' >&2
-            exit 1
-       fi;;
-    o) OPTARG=`echo ${OPTARG} | tr [:lower:] [:upper:]`
+       fnd=0
+       for pkg in ${PLIST//|/ }
+       do
+         if [ ${OPTARG} = $pkg ]
+         then CPACK_GENERATOR+="${OPTARG};"
+              fnd=1
+              break
+         fi
+       done
+       [ $fnd -ne 1 ] && error_exit "Unknown package type '${OPTARG}'"
+       ;;
+    o) OPTARG=${OPTARG^^}
        check_optional_arg $opt ${OPTARG} 1
-       if [ ${OPTARG} = "MBX" ]
-       then if [ -n "${CONFIG_DEFINES}" ]
-            then CONFIG_DEFINES="${CONFIG_DEFINES} -DHAVE_CRTN_MBX=ON"
-            else CONFIG_DEFINES="-DHAVE_CRTN_MBX=ON"
-            fi
-       elif [ ${OPTARG} = "SEM" ]
-       then if [ -n "${CONFIG_DEFINES}" ]
-            then CONFIG_DEFINES="${CONFIG_DEFINES} -DHAVE_CRTN_SEM=ON"
-            else CONFIG_DEFINES="-DHAVE_CRTN_SEM=ON"
-            fi
-       else echo Unknown service \'${OPTARG}\' >&2
-            exit 1
-       fi;;
+       fnd=0
+       for opt in ${OPTLIST//|/ }
+       do
+         if [ ${OPTARG} = $opt ]
+         then CONFIG_DEFINES+="-DHAVE_CRTN_"${OPTARG}"=ON "
+              fnd=1
+              break
+         fi
+       done
+       [ $fnd -ne 1 ] && error_exit "Unknown optional service '${OPTARG}'"
+       ;;
     B) BUILD_IT=1;;
     b) check_optional_arg $opt ${OPTARG} 1
        check_build_dir ${OPTARG}
@@ -242,44 +224,31 @@ do
     h) help $0
        exit 0;;
     :) manage_optional_arg ${OPTARG};;
-    \?) echo Invalid option -${OPTARG} >&2
-        exit 1;;
+    \?) error_exit "Invalid option -${OPTARG}";;
     *) help $0
        exit 1;;
   esac
 done
 
-shift $((${OPTIND} - 1))
+shift $((OPTIND - 1))
 
 # Check the arguments
-if [ -n "$1" ]
-then
-  echo Too many arguments >&2
-  exit 1
-fi
+[ -n "$1" ] && error_exit "Too many arguments"
 
 # Make sure that we are running in the source directory
-if [ ! -f `basename $0` ]
-then
-  echo This script must be run in the source directory of CRTN >&2
-  exit 1
-else
-  SRC_DIR=`pwd`
-fi
+[ ! -f `basename $0` ] && error_exit "This script must be run in the source directory of CRTN"
+SRC_DIR=`pwd`
 
 # Make sure that we are running as root user for some options
 if [ ${INSTALL_IT} -eq 1 -o ${UNINSTALL_IT} -eq 1 ]
 then
   uid=`id -u`
-  if [ ${uid} -ne 0 ]
-  then
-    echo "At least one of the specified script option needs super user rights (try at least sudo)" >&2
-    exit 1
-  fi
+  [ ${uid} -ne 0 ] && error_exit "At least one of the specified script option needs super user rights (try at least sudo)"
 fi
 
 check_tool cmake
 
+# If cleanup is requested
 if [ ${CLEANUP} -eq 1 ]
 then
   clean_build
@@ -288,7 +257,6 @@ fi
 # If archive is requested
 if [ ${ARCHIVE_IT} -eq 1 ]
 then
-
   check_tool tar
 
   # Launch the configuration to get CRTN config file
@@ -296,15 +264,11 @@ then
   create_build_dir
   cd ${BUILD_DIR}
   cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
-  cd -
+  cd ${SRC_DIR}
 
   # Get CRTN's version
   CRTN_VERSION=`cat ${BUILD_DIR}/config.h | grep -E "^#define CRTN_VERSION" | cut -d' ' -f3 | cut -d\" -f2`
-  if [ -z "${CRTN_VERSION}" ]
-  then
-    echo Unable to get the version of the software >&2
-    exit 1
-  fi
+  [ -z "${CRTN_VERSION}" ] && error_exit "Unable to get the version of the software"
 
   ARCHIVE_DIR=crtn_src-${CRTN_VERSION}
   ARCHIVE_NAME=${ARCHIVE_DIR}.tgz
@@ -312,11 +276,7 @@ then
   # Make sure that the list of file exists
   FILE_LIST=file_list.txt
 
-  if test ! -f ${FILE_LIST}
-  then
-    echo ${FILE_LIST} does not exist >&2
-    exit 1
-  fi
+  [ ! -f ${FILE_LIST} ] && error_exit "${FILE_LIST} does not exist"
 
   mkdir -p ${TMP_DIR}/${ARCHIVE_DIR}
 
@@ -359,7 +319,7 @@ then
   cd ${BUILD_DIR}
   cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
   make
-  cd -
+  cd ${SRC_DIR}
 fi
 
 # If cross-build is requested
@@ -368,39 +328,31 @@ then
   clean_build
   create_build_dir
   cd ${BUILD_DIR}
-  if [ ! -f ${TOOLCHAIN} ]
-  then echo The toolchain file '${TOOLCHAIN}' is not accessible from '${BUILD_DIR}' directory >&2
-       exit 1
-  fi
+  [ ! -f ${TOOLCHAIN} ] && error_exit "The toolchain file '${TOOLCHAIN}' is not accessible from '${BUILD_DIR}' directory"
   cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
   make
-  cd -
+  cd ${SRC_DIR}
 fi
 
 # If installation is requested
 if [ ${INSTALL_IT} -eq 1 ]
 then
-
   # Make the build directory
   create_build_dir
-
   cd ${BUILD_DIR}
   cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
   make
   make install
-  cd -
+  cd ${SRC_DIR}
 fi
 
 # If uninstallation is requested
 if [ ${UNINSTALL_IT} -eq 1 ]
 then
-  if [ ! -d ${BUILD_DIR} ]
-  then echo Build directory \(${BUILD_DIR}\) is not created, uninstallation not possible... >&2
-       exit 1
-  fi
+  [ ! -d ${BUILD_DIR} ] && error_exit "Build directory (${BUILD_DIR}) is not created, uninstallation not possible..."
   cd ${BUILD_DIR}
   make uninstall
-  cd -
+  cd ${SRC_DIR}
 fi
 
 # If test is requested
@@ -412,7 +364,7 @@ then
   cmake ${CONFIG_DEFINES} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
   make
   tests/check_all
-  cd -
+  cd ${SRC_DIR}
 fi
 
 # If test coverage is requested
@@ -424,28 +376,23 @@ then
   cmake ${CONFIG_DEFINES} -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug ${SRC_DIR}
   make
   make all_coverage
-  cd -
+  cd ${SRC_DIR}
   if [ -n "${BROWSER}" ]
   then
     ${BROWSER} ${BUILD_DIR}/all_coverage/index.html
   fi
 fi
 
+# If packaging is requested
 if [ -n "${CPACK_GENERATOR}" ]
 then
-
   clean_build
   create_build_dir
-
   cd ${BUILD_DIR}
-
   # Configure CMAKE
   cmake ${CONFIG_DEFINES} -DCPACK_GENERATOR=${CPACK_GENERATOR} -DCMAKE_INSTALL_PREFIX=${INST_DIR} ${SRC_DIR}
-
   # Launch the build
   make
   make package
-
-  cd -
-
+  cd ${SRC_DIR}
 fi
