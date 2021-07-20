@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
-INSTALL_PREFIX=@INSTALL_PREFIX@
+INSTALL_PREFIX=@CMAKE_INSTALL_PREFIX@
 
-for f in crtn.3.gz
+for f in @ONLINE_MANUALS@
 do
-  FILE=${INSTALL_PREFIX}/share/man/man3/${f}
+  suffix=${f#*.}
+  FILE=${INSTALL_PREFIX}/share/man/man${suffix}/`basename ${f}`
   chmod 444  ${FILE}
   chown root ${FILE}
   chgrp root ${FILE}

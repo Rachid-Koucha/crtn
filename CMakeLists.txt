@@ -13,7 +13,7 @@ cmake_policy(SET CMP0048 NEW)
 #           PROJECT_DESCRIPTION, crtn_DESCRIPTION
 #           PROJECT_HOMEPAGE_URL, crtn_HOMEPAGE_URL
 PROJECT(crtn
-        VERSION 0.2.2
+        VERSION 0.2.3
         DESCRIPTION "CoRouTiNe API for C language"
         HOMEPAGE_URL "https://github.com/Rachid-Koucha/crtn"
         LANGUAGES C)
@@ -181,12 +181,6 @@ SET(CPACK_RPM_PACKAGE_LICENSE "GPL/LGPL")
 SET(CPACK_RPM_CRTN_POST_INSTALL_SCRIPT_FILE ${CMAKE_BINARY_DIR}/crtn.postinst)
 
 
-#
-# To set before "ADD_SUBDIRECTORY" to propagate the variable into the sub-
-# directories
-#
-#SET(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-CONFIGURE_FILE(crtn.postinst.in crtn.postinst @ONLY)
 
 #
 # Configure the header file
@@ -211,6 +205,16 @@ FOREACH(man ${ONLINE_MANUALS})
   CONFIGURE_FILE(${man}.in ${man} @ONLY)
 
 ENDFOREACH()
+
+
+#
+# To set before "ADD_SUBDIRECTORY" to propagate the variable into the sub-
+# directories
+#
+#SET(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+SET(ONLINE_MANUALS_LIST ${ONLINE_MANUALS})
+string(REPLACE ";" " " ONLINE_MANUALS "${ONLINE_MANUALS_LIST}")
+CONFIGURE_FILE(crtn.postinst.in crtn.postinst @ONLY)
 
 ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(lib)
