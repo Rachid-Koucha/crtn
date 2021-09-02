@@ -43,7 +43,7 @@ The service is an abstraction layer implemented as a shared library on top of GL
 
 `crtn` is distributed under the GNU LGPL license.
 
-The current document concerns `crtn` version **0.2.3**.
+The current document concerns `crtn` version **0.2.4**.
 
 An article has been published in french in [GNU Linux Magazine France of September 2021](https://connect.ed-diamond.com/gnu-linux-magazine/glmf-251):
 
