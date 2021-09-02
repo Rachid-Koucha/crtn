@@ -43,11 +43,13 @@ The service is an abstraction layer implemented as a shared library on top of GL
 
 `crtn` is distributed under the GNU LGPL license.
 
-The current document concerns `crtn` version **0.2.3**.
+The current document concerns `crtn` version **0.2.4**.
 
-An article has been published in french in (GNU Linux Magazine France of September 2021)[https://connect.ed-diamond.com/gnu-linux-magazine/glmf-251]:
+An article has been published in french in [GNU Linux Magazine France of September 2021](https://connect.ed-diamond.com/gnu-linux-magazine/glmf-251):
 
 <p align="center"><img src="doc/cover_01.png"></p>
+
+A second one will be published in a subsequent issue.
 
 
 ## <a name="2_Maintainers"></a>2 Maintainers
@@ -61,10 +63,10 @@ To clone it:
 ```
 $ git clone https://github.com/Rachid-Koucha/crtn.git
 ```
-To get the source code of the 0.2.3 version:
+To get the source code of the 0.2.4 version:
 ```
 $ cd crtn
-crtn$ git checkout tags/v0.2.3
+crtn$ git checkout tags/v0.2.4
 ```
 
 The source tree is:
@@ -75,7 +77,7 @@ The source tree is:
 
 In the following paragraphs, we suppose that the source code tree is located in _$HOME/crtn_.
 
-To avoid the pollution of the source code tree with generated objects, it is
+To avoid the pollution of the source code tree with the build artifacts, it is
 preferable to make an out of source configuration and build. So, we create a
 build directory from which all the configuration/build operations will be done.
 In the the following sections, we use _/tmp/crtn_build_:
@@ -93,7 +95,7 @@ To configure the build:
 /tmp/crtn_build$ ls
 /tmp/crtn_build$ cmake $HOME/crtn
 [...]
--- Configuring CRTN version 0.2.3
+-- Configuring CRTN version 0.2.4
 [...]
 -- Build files have been written to: /tmp/crtn_build
 /tmp/crtn_build$ ls
@@ -114,7 +116,7 @@ HAVE_CRTN_SEM:BOOL=OFF
 To configure the package with the optional mailbox and semaphore services:
 ```
 /tmp/crtn_build$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON $HOME/crtn
--- Configuring CRTN version 0.2.3
+-- Configuring CRTN version 0.2.4
 [...]
 -- Build files have been written to: /tmp/crtn_build
 /tmp/crtn_build$ cmake -LH
@@ -135,7 +137,7 @@ To build the software:
 [  3%] Building C object lib/CMakeFiles/crtn.dir/crtn_mbx.c.o
 [...]
 /tmp/crtn_build$ ls lib
-[...]libcrtn.so  libcrtn.so.0  libcrtn.so.0.2.2
+[...]libcrtn.so  libcrtn.so.0  libcrtn.so.0.2.4
 ```
 
 To clean the built files:
@@ -152,8 +154,8 @@ To install the software in the default _/usr/local_ directory:
 /tmp/crtn_build$ sudo make install
 /tmp/crtn_build$ ls -l /usr/local/lib/libcrtn.so*
 lrwxrwxrwx 1 root root    12 mars   21 12:04 /usr/local/lib/libcrtn.so -> libcrtn.so.0
-lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.0 -> libcrtn.so.0.2.3
--r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.0.2.3
+lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.0 -> libcrtn.so.0.2.4
+-r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.0.2.4
 /tmp/crtn_build$ ls -l /usr/local/share/man/man3/crtn*
 -r--r--r-- 1 root root 2786 mars   21 12:04 /usr/local/share/man/man3/crtn.3.gz
 -r--r--r-- 1 root root   55 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_delete.3.gz
@@ -207,12 +209,12 @@ To measure the tests coverage, the `gcov/lcov` packages are required. For exampl
 ```
 /tmp/crtn_build$ make clean
 /tmp/crtn_build$ cmake -DHAVE_CRTN_MBX=ON -DHAVE_CRTN_SEM=ON -DCMAKE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug $HOME/crtn
--- Configuring CRTN version 0.2.3
+-- Configuring CRTN version 0.2.4
 CMAKE_C_COMPILER_ID=GNU
 -- Appending code coverage compiler flags: -g -O0 --coverage -fprofile-arcs -ftest-coverage
 [...]
 /tmp/crtn_build$ make
--- Configuring CRTN version 0.2.3
+-- Configuring CRTN version 0.2.4
 CMAKE_C_COMPILER_ID=GNU
 -- Appending code coverage compiler flags: -g -O0 --coverage -fprofile-arcs -ftest-coverage
 [...]
@@ -245,13 +247,13 @@ Self Extracting Tar GZipped (_stgz_) binary packages with the semaphore/mailbox 
 /tmp/crtn_build$ make
 /tmp/crtn_build$ make package
 [...]
-CPack: - package: .../crtn/crtn_0.2.3_amd64.deb generated.
+CPack: - package: .../crtn/crtn_0.2.4_amd64.deb generated.
 [...]
-Pack: - package: .../crtn/crtn-0.2.3-1.x86_64.rpm generated.
+Pack: - package: .../crtn/crtn-0.2.4-1.x86_64.rpm generated.
 [...]
-CPack: - package: .../crtn/crtn-0.2.3-Linux-crtn.tar.gz generated.
+CPack: - package: .../crtn/crtn-0.2.4-Linux-crtn.tar.gz generated.
 [...]
-CPack: - package: .../crtn/crtn-0.2.3-Linux-crtn.sh generated.
+CPack: - package: .../crtn/crtn-0.2.4-Linux-crtn.sh generated.
 ```
 
 ### <a name="4_7_Cross_compiling"></a>4.7 Cross-compiling
@@ -272,8 +274,8 @@ For an ARM 32 bits build when **crossbuild-essential-armhf** is installed::
 [  1%] Building C object lib/CMakeFiles/crtn.dir/crtn.c.o
 [  3%] Building C object lib/CMakeFiles/crtn.dir/crtn_mbx.c.o
 [...]
-/tmp/crtn_build$ file lib/libcrtn.so.0.2.3
-lib/libcrtn.so.0.2.3: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
+/tmp/crtn_build$ file lib/libcrtn.so.0.2.4
+lib/libcrtn.so.0.2.4: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
 ```
 For an ARM 64 bits build when **crossbuild-essential-arm64** is installed:
 ```
@@ -289,8 +291,8 @@ Scanning dependencies of target crtn
 [  1%] Building C object lib/CMakeFiles/crtn.dir/crtn.c.o
 [  3%] Building C object lib/CMakeFiles/crtn.dir/crtn_mbx.c.o
 [...]
-/tmp/crtn_build$ file lib/libcrtn.so.0.2.3
-lib/libcrtn.so.0.2.3: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=6a60c0908cb8f4b94827418dbfa17eebf556b9fa, with debug_info, not stripped
+/tmp/crtn_build$ file lib/libcrtn.so.0.2.4
+lib/libcrtn.so.0.2.4: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=6a60c0908cb8f4b94827418dbfa17eebf556b9fa, with debug_info, not stripped
 ```
 
 ## <a name="5_Adm_script"></a>5 Administration with crtn_install.sh
@@ -331,7 +333,7 @@ Usage:
 
 Note that some options require super user privileges. Use `sudo` for example.
 
-To avoid the pollution of the source code tree with generated objects, it is preferable to make
+To avoid the pollution of the source code tree with build artifacts, it is preferable to make
 an out of source configuration and build. The build directory is specified with the `-b` option.
 By default, a sub-directory called _build_ is created by the tool at the top level of the source tree.
 
@@ -347,7 +349,7 @@ $HOME/crtn$ ./crtn_install.sh -B
 $HOME/crtn$ ls build
 [...]include  lib  man  tests
 $HOME/crtn$ ls build/lib
-[...]libcrtn.so  libcrtn.so.0  libcrtn.so.0.2.3
+[...]libcrtn.so  libcrtn.so.0  libcrtn.so.0.2.4
 ```
 If mailbox and/or semaphores services are required, add the corresponding options on the command line:
 ```
@@ -359,8 +361,8 @@ For a complete installation in the default _/usr/local_ subtree (super user righ
 $HOME/crtn$ sudo ./crtn_install.sh -I
 $HOME/crtn$ ls -l /usr/local/lib/libcrtn.so*
 lrwxrwxrwx 1 root root    12 mars   21 12:04 /usr/local/lib/libcrtn.so -> libcrtn.so.0
-lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.0 -> libcrtn.so.0.2.3
--r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.0.2.3
+lrwxrwxrwx 1 root root    16 mars   21 12:04 /usr/local/lib/libcrtn.so.0 -> libcrtn.so.0.2.4
+-r--r--r-- 1 root root 60040 mars   21 12:04 /usr/local/lib/libcrtn.so.0.2.4
 $HOME/crtn$ ls -l /usr/local/share/man/man3/crtn*
 -r--r--r-- 1 root root 2786 mars   21 12:04 /usr/local/share/man/man3/crtn.3.gz
 -r--r--r-- 1 root root   55 mars   21 12:04 /usr/local/share/man/man3/crtn_attr_delete.3.gz
@@ -376,7 +378,7 @@ $HOME/crtn$ sudo ./crtn_install.sh -U
 $HOME/crtn$ ls -l /usr/local/share/man/man7/crtn*
 ls: cannot access '/usr/local/share/man/man7/crtn*': No such file or directory
 ```
-To cleanup every generated files to go back to original source tree:
+To cleanup every build artifacts to go back to original source tree:
 ```
 $HOME/crtn$ ./crtn_install.sh -c
 Removing 'build' directory
@@ -416,7 +418,7 @@ To make a tar gzip source package, use the `-A` option of `crtn_install.sh`:
 ```
 $HOME/crtn$ ./crtn_install.sh -A
 [...]
-Building archive build/crtn_src-0.2.3.tgz...
+Building archive build/crtn_src-0.2.4.tgz...
 ```
 It is also possible to generate Debian (_deb_), Red-Hat Package Manager (_rpm_), Tar GZipped (_tgz_)
 and Self Extracting Tar GZipped (_stgz_) binary packages:
@@ -424,10 +426,10 @@ and Self Extracting Tar GZipped (_stgz_) binary packages:
 $HOME/crtn$ ./crtn_install.sh -c -P tgz -P rpm -P deb -P stgz
 ```
 This makes the following binary packages in the _build_ sub-directory:
-* _crtn_0.2.3_amd64.deb (deb)_
-* _crtn-0.2.3-1.x86_64.rpm (rpm)_
-* _crtn-0.2.3-Linux-crtn.tar.gz (tgz)_
-* _crtn-0.2.3-Linux-crtn.sh (stgz)_
+* _crtn_0.2.4_amd64.deb (deb)_
+* _crtn-0.2.4-1.x86_64.rpm (rpm)_
+* _crtn-0.2.4-Linux-crtn.tar.gz (tgz)_
+* _crtn-0.2.4-Linux-crtn.sh (stgz)_
 
 ### <a name="5_6_Cross_compiling"></a>5.6 Cross-compiling
 
@@ -441,8 +443,8 @@ $HOME/crtn$ ./crtn_install.sh -X $HOME/crtn/cmake/toolchains/arm-linux-gnueabihf
 -- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc
 -- Check for working C compiler: /usr/bin/arm-linux-gnueabihf-gcc -- works
 [...]
-$HOME/crtn$ file build/lib/libcrtn.so.0.2.3
-lib/libcrtn.so.0.2.3: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
+$HOME/crtn$ file build/lib/libcrtn.so.0.2.4
+lib/libcrtn.so.0.2.4: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=9a719ea0ab44ecffe6100f146f08fb6cf6b57e63, with debug_info, not stripped
 ```
 
 For an ARM 64 bits build when **crossbuild-essential-arm64** is installed:
@@ -453,8 +455,8 @@ Removing 'build' directory
 -- Check for working C compiler: /usr/bin/aarch64-linux-gnu-gcc
 -- Check for working C compiler: /usr/bin/aarch64-linux-gnu-gcc -- works
 [...]
-$HOME/crtn$ file build/lib/libcrtn.so.0.2.3
-lib/libcrtn.so.0.2.3: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=6a60c0908cb8f4b94827418dbfa17eebf556b9fa, with debug_info, not stripped
+$HOME/crtn$ file build/lib/libcrtn.so.0.2.4
+lib/libcrtn.so.0.2.4: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=6a60c0908cb8f4b94827418dbfa17eebf556b9fa, with debug_info, not stripped
 ```
 
 
@@ -669,7 +671,7 @@ Coroutines are well-suited for implementing cooperating tasks in event-driven
 applications.
 
 The following is an example of producer/consumer program reimplementing the shell's `wc` program to count the
-lines, words and characters from the standard input. The behaviour of the program is depicted with the following
+lines, words and characters from the standard input. The behaviour of the program is depicted in the following
 diagram:
 
 <p align="center"><img src="doc/crtn_wc.png"></p>
@@ -1052,7 +1054,7 @@ Lines: 50 / Words: 91 / Spaces: 41 / Characters: 3017
 
 As described in `man 7 crtn`, several environment variables are interpreted at library's initialization time:
 - **CRTN_MAX**: Maximum number of coroutines (20 by default);
-- **CRTN_MBX_MAX**: Maximum number of semaphores (64 by default);
+- **CRTN_MBX_MAX**: Maximum number of mailboxes (64 by default);
 - **CRTN_SEM_MAX**: Maximum number of semaphores (64 by default);
 - **CRTN_STACK_SIZE**: Size in bytes of the stack of **stackless**/**stackful** coroutines (16384 by default).
 
@@ -1070,15 +1072,15 @@ If high performances are required, one may consider reimplementing `get/make/swa
 
 To get information on a package file:
 ```
-$ rpm -qp --info crtn-0.2.3-1.x86_64.rpm
+$ rpm -qp --info crtn-0.2.4-1.x86_64.rpm
 Name        : crtn
-Version     : 0.2.3
+Version     : 0.2.4
 Release     : 1
 Architecture: x86_64
 [...]
 License     : GPL/LGPL
 Signature   : (none)
-Source RPM  : crtn-0.2.3-1.src.rpm
+Source RPM  : crtn-0.2.4-1.src.rpm
 [...]
 Relocations : /usr/local 
 Vendor      : Rachid Koucha
@@ -1089,7 +1091,7 @@ CoRouTiNe API for C language
 ```
 To get the pre/post-installation scripts in a package file:
 ```
-$ rpm -qp --scripts rsys-0.2.3-1.x86_64.rpm
+$ rpm -qp --scripts rsys-0.2.4-1.x86_64.rpm
 preinstall program: /bin/sh
 postinstall scriptlet (using /bin/sh):
 
@@ -1107,20 +1109,20 @@ $ rpm -ql crtn
 ```
 To list the files in a package file:
 ```
-$ rpm -ql crtn-0.2.3-1.x86_64.rpm
+$ rpm -ql crtn-0.2.4-1.x86_64.rpm
 ```
 The required package list of an _rpm_ file could be printed with:
 ```
-$ rpm -qp --requires crtn-0.2.3-1.x86_64.rpm
+$ rpm -qp --requires crtn-0.2.4-1.x86_64.rpm
 ```
 ### <a name="A_2_Notes_deb"></a>A.2 Notes about DEB package
 
 To get information on a package file:
 ```
-$ dpkg --info crtn_0.2.3_amd64.deb
+$ dpkg --info crtn_0.2.4_amd64.deb
 [...]
  Package: crtn
- Version: 0.2.3
+ Version: 0.2.4
  Section: devel
  Priority: optional
  Architecture: amd64
@@ -1131,11 +1133,11 @@ $ dpkg --info crtn_0.2.3_amd64.deb
 ```
 To list the files in a package file:
 ```
-$ dpkg -c crtn_0.2.3_amd64.deb
+$ dpkg -c crtn_0.2.4_amd64.deb
 ```
 To install the content of a package file (super user rights required):
 ```
-$ sudo dpkg -i crtn_0.2.3_amd64.deb
+$ sudo dpkg -i crtn_0.2.4_amd64.deb
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/
 drwxr-xr-x root/root         0 2021-03-12 20:06 ./usr/local/include/
@@ -1147,7 +1149,7 @@ lrwxrwxrwx root/root         0 2021-03-12 20:06 ./usr/local/lib/libcrtn.so
 To list the installed packages:
 ```
 $ dpkg -l | grep crtn
-ii  crtn  0.2.3    amd64   CoRouTiNe API for C language
+ii  crtn  0.2.4    amd64   CoRouTiNe API for C language
 ```
 To uninstall (remove) a package (super user rights required):
 ```
