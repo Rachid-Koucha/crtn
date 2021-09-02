@@ -46,6 +46,9 @@ man/*.3
 man/*.7
 man/*.gz
 
+# Docs
+doc/cover_01.xcf
+
 # Tests
 tests/check_all
 tests/fibonacci
