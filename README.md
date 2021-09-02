@@ -1054,7 +1054,7 @@ Lines: 50 / Words: 91 / Spaces: 41 / Characters: 3017
 
 As described in `man 7 crtn`, several environment variables are interpreted at library's initialization time:
 - **CRTN_MAX**: Maximum number of coroutines (20 by default);
-- **CRTN_MBX_MAX**: Maximum number of semaphores (64 by default);
+- **CRTN_MBX_MAX**: Maximum number of mailboxes (64 by default);
 - **CRTN_SEM_MAX**: Maximum number of semaphores (64 by default);
 - **CRTN_STACK_SIZE**: Size in bytes of the stack of **stackless**/**stackful** coroutines (16384 by default).
 
