@@ -45,9 +45,11 @@ The service is an abstraction layer implemented as a shared library on top of GL
 
 The current document concerns `crtn` version **0.2.3**.
 
-An article has been published in french in (GNU Linux Magazine France of September 2021)[https://connect.ed-diamond.com/gnu-linux-magazine/glmf-251]:
+An article has been published in french in [GNU Linux Magazine France of September 2021](https://connect.ed-diamond.com/gnu-linux-magazine/glmf-251):
 
 <p align="center"><img src="doc/cover_01.png"></p>
+
+A second one will be published in a subsequent issue.
 
 
 ## <a name="2_Maintainers"></a>2 Maintainers
