@@ -333,7 +333,7 @@ Usage:
 
 Note that some options require super user privileges. Use `sudo` for example.
 
-To avoid the pollution of the source code tree with generated objects, it is preferable to make
+To avoid the pollution of the source code tree with build artifacts, it is preferable to make
 an out of source configuration and build. The build directory is specified with the `-b` option.
 By default, a sub-directory called _build_ is created by the tool at the top level of the source tree.
 
@@ -378,7 +378,7 @@ $HOME/crtn$ sudo ./crtn_install.sh -U
 $HOME/crtn$ ls -l /usr/local/share/man/man7/crtn*
 ls: cannot access '/usr/local/share/man/man7/crtn*': No such file or directory
 ```
-To cleanup every generated files to go back to original source tree:
+To cleanup every build artifacts to go back to original source tree:
 ```
 $HOME/crtn$ ./crtn_install.sh -c
 Removing 'build' directory
@@ -671,7 +671,7 @@ Coroutines are well-suited for implementing cooperating tasks in event-driven
 applications.
 
 The following is an example of producer/consumer program reimplementing the shell's `wc` program to count the
-lines, words and characters from the standard input. The behaviour of the program is depicted with the following
+lines, words and characters from the standard input. The behaviour of the program is depicted in the following
 diagram:
 
 <p align="center"><img src="doc/crtn_wc.png"></p>
