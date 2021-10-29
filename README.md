@@ -45,11 +45,11 @@ The service is an abstraction layer implemented as a shared library on top of GL
 
 The current document concerns `crtn` version **0.2.4**.
 
-An article has been published in french in [GNU Linux Magazine France of September 2021](https://connect.ed-diamond.com/gnu-linux-magazine/glmf-251):
+Two articles have been published in french in the issues number [251](https://connect.ed-diamond.com/gnu-linux-magazine/glmf-251) and [253](https://connect.ed-diamond.com/gnu-linux-magazine/glmf-253) of GNU Linux Magazine France:
 
-<p align="center"><img src="doc/cover_01.png"></p>
+<p align="center"><a href="https://connect.ed-diamond.com/gnu-linux-magazine/glmf-251/execution-concurrente-avec-les-coroutines"><img src="doc/cover_01.png"></a></p>
 
-A second one will be published in a subsequent issue.
+<p align="center"><a href="https://connect.ed-diamond.com/gnu-linux-magazine/glmf-253/une-api-de-coroutines-pour-le-langage-c"><img src="doc/cover_02.png"></a></p>
 
 
 ## <a name="2_Maintainers"></a>2 Maintainers

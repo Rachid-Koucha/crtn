@@ -48,6 +48,7 @@ man/*.gz
 
 # Documentation
 doc/cover_01.xcf
+doc/cover_02.xcf
 
 # Tests
 tests/check_all
